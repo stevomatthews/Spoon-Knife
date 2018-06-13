@@ -13,7 +13,7 @@ SRT Handshake
 
 - [UDT Legacy Handshake](#udt-legacy-handshake)
 
--- [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
+  - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
 
 # Overview
 
