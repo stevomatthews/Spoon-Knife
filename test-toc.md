@@ -1,6 +1,6 @@
 SRT Handshake
 =============
-#Contents
+# Contents
 
 [Overview](#overview)
 
@@ -12,7 +12,7 @@ SRT Handshake
 
   [UDT Legacy Handshake](#udt-legacy-handshake)
 
-#Overview
+# Overview
 
 SRT is a connection protocol, and as such it embraces the concepts of "connection"
 and "session". The UDP system protocol is used by SRT for sending data as well as
@@ -122,7 +122,7 @@ don't use it.
 
 
 
-#Handshake Structure
+# Handshake Structure
 
 The handshake structure contains the following 32-bit fields in order:
 
@@ -196,7 +196,7 @@ field is 5 from the very beginning, and the `Type` field is set, the rules of
 HSv5 apply. But if one party is using version 4, the handshake continues as HSv4.
 
 
-#The "UDT Legacy" and "SRT Extended" Handshakes
+# The "UDT Legacy" and "SRT Extended" Handshakes
 
 ### UDT Legacy Handshake
 
