@@ -1,5 +1,4 @@
-SRT Handshake
-=============
+# SRT Handshake
 
 **Contents**
 
@@ -17,7 +16,7 @@ SRT Handshake
 - [The Rendezvous Handshake](#the-rendezvous-handshake)
   - [HSv4 Rendezvous Process](#hsv4-rendezvous-process)
   - [HSv5 Rendezvous Process](#hsv5-rendezvous-process)
-  - [The parallel arrangement considerations](#the-parallel-arrangement-considerations)
+  - [Parallel Arrangement Considerations](#parallel-arrangement-considerations)
   - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
 - [The SRT Extended Handshake](#the-srt-extended-handshake)
   - [HSv4 Extended Handshake Process](#hsv4-extended-handshake-process)
@@ -137,6 +136,7 @@ The `Additional data` field is used in some control messages as extra space for
 data. Its interpretation depends on the particular message type. Handshake messages
 don't use it.
 
+[Return to top of page](#srt-handshake)
 
 
 ## Handshake Structure
@@ -212,6 +212,8 @@ side crafts its own handshake individually. If the value of the `Version`
 field is 5 from the very beginning, and the `Type` field is set, the rules of 
 HSv5 apply. But if one party is using version 4, the handshake continues as HSv4.
 
+[Return to top of page](#srt-handshake)
+
 
 ## The "UDT Legacy" and "SRT Extended" Handshakes
 
@@ -270,6 +272,8 @@ data interchange during the handshake (see **The Rendezvous Handshake** below)
 Note that if the handshake can be done as HSv5, the connection is always
 considered bidirectional and the `SRTO_SENDER` flag is unused.
 
+[Return to top of page](#srt-handshake)
+
 
 ### Request Type
 
@@ -291,6 +295,8 @@ handshake message type.
 
 Note that the **Rendezvous** process is different in HSv4 and HSv5, as the latter 
 is based on a state machine.
+
+[Return to top of page](#srt-handshake)
 
 
 ### The Type Field
@@ -342,6 +348,8 @@ connections it is reasonable to set this value on the Listener only. In
 the case of Rendezvous the only reasonable approach is to decide upon the correct value
 from the different sources and to set it on both parties (note that AES-128 is the
 default).
+
+[Return to top of page](#srt-handshake)
 
 
 ## The Caller-Listener Handshake
@@ -408,6 +416,9 @@ where someone who, in attempting to extend UDT independently, increases the
 value, which is interpreted as an advertised `PBKEYLEN` (in which case it is
 written into the value of the `SRTO_PBKEYLEN` option).
 
+[Return to top of page](#srt-handshake)
+
+
 ### The Conclusion Phase
 
 Once the Caller gets his cookie, it sends the `URQ_CONCLUSION` handshake
@@ -453,6 +464,8 @@ have precedence over the Caller is the advertised `PBKEYLEN` in the
 `Encryption Flags` field in `Type` field. The value for latency is always
 agreed to be the greater of those reported by each party.
 
+[Return to top of page](#srt-handshake)
+
 
 ## The Rendezvous Handshake
 
@@ -468,6 +481,9 @@ The base statements for Rendezvous handshake are the same in HSv4 and HSv5,
 however HSv5 has more data to exchange and more conditions to be taken into
 account and this makes this process more complicated. You can consider the HSv4
 process description to be an introduction for HSv5, though.
+
+[Return to top of page](#srt-handshake)
+
 
 ### HSv4 Rendezvous Process
 
@@ -503,6 +519,9 @@ With HSv4 there's no debate about who is the Initiator and who is the Responder
 because  this transaction is unidirectional, so the party that has set the 
 `SRTO_SENDER` flag is the Initiator and the other is Responder (as is usual 
 with HSv4).
+
+[Return to top of page](#srt-handshake)
+
 
 ### HSv5 Rendezvous Process
 
@@ -625,8 +644,10 @@ he receives anything else from Alice. If Bob is going to send, however, it
 has to continue sending the same `URQ_CONCLUSION` until it gets the confirmation
 from Alice.
 
+[Return to top of page](#srt-handshake)
 
-### The parallel arrangement considerations
+
+### Parallel Arrangement Considerations
 
 The handshake flow described above happens in so-called "99% of cases" and
 it's called "serial arrangement". It relies on the fact that one of the peers
@@ -706,6 +727,8 @@ means that it continues sending Conclusion+HSRSP, until it receives any packet
 that will make it switch to Connected state, normally Agreement. Only then does
 it exit the connecting state and the application is allowed to start transmission.
 
+[Return to top of page](#srt-handshake)
+
 
 ### Rendezvous Between Different Versions
 
@@ -719,6 +742,8 @@ required for version 5. This happens only for the "waving" phase, and fortunatel
 HSv4 clients ignore these fields. When switching to the conclusion phase, the
 HSv5 client is already aware that the peer is HSv4 and fills the fields of the
 conclusion handshake message according to the rules of HSv4.
+
+[Return to top of page](#srt-handshake)
 
 
 ## The SRT Extended Handshake
@@ -765,6 +790,8 @@ messages that are sent as "REQ" parts will be repeatedly sent until they get
 a corresponding "RSP" part, up to some timeout, after which they give up and
 stay with a pure UDT connection.
 
+[Return to top of page](#srt-handshake)
+
 
 ### HSv5 Extended Handshake Process
 
@@ -807,6 +834,8 @@ shall be equal to `UDT_DGRAM` (2), and in the HSv5 by the extra *Smoother*
 block declaration (see below). In any case, when there's no *Smoother*
 declared, *Live* is assumed. Otherwise the Smoother type must be exactly
 the same on both sides.
+
+[Return to top of page](#srt-handshake)
 
 
 ### SRT Extension Commands
@@ -976,6 +1005,8 @@ retransmitting packets, which are known to be too late to retransmit anyway.
 This latency value is one of the factors taken into account to calculate
 the time threshold for it.
 
+[Return to top of page](#srt-handshake)
+
 
 #### KMREQ and KMRSP
 
@@ -1120,6 +1151,8 @@ KM exchange. In HSv5 the initial KM exchange is done within the handshake
 in both directions, and then the key refreshing updates the key for one
 direction only.
 
+[Return to top of page](#srt-handshake)
+
 
 #### Smoother
 
@@ -1150,6 +1183,8 @@ contains however much more changes and allows to select the original UDT code
 in places that must have been modified in SRT in order to support the live
 transmission.
 
+[Return to top of page](#srt-handshake)
+
 
 #### Stream ID (SID)
 
@@ -1165,5 +1200,5 @@ what to do with this connection - such as to decide which stream to send
 in the case where the Listener is the stream Sender. This feature is not
 predicted to be used for Rendezvous connection, as it hardly makes sense.
 
-[Return to top](#srt-handshake)
+[Return to top of page](#srt-handshake)
 
