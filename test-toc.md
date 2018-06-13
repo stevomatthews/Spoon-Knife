@@ -1,6 +1,7 @@
 SRT Handshake
 =============
-# Contents
+
+**Contents**
 
 [Overview](#overview)
 
@@ -10,7 +11,9 @@ SRT Handshake
 
 [The "UDT Legacy" and "SRT Extended" Handshakes](#the-udt-legacy-and-srt-extended-handshakes)
 
-  [UDT Legacy Handshake](#udt-legacy-handshake)
+- [UDT Legacy Handshake](#udt-legacy-handshake)
+
+-- [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
 
 # Overview
 
@@ -69,7 +72,7 @@ specified SRT socket (not the whole application!)
  - *Peer* is the opposite Party that is (possibly about to be) connected to an
 *Agent*
 
-#Short Introduction to SRT Packet Structure
+# Short Introduction to SRT Packet Structure
 
 Every UDP packet carrying SRT traffic contains an SRT header, which
 consists of the 4 following 32-bit major fields:
