@@ -1,16 +1,16 @@
 SRT Handshake
 =============
+#Contents
+
 [Overview](#overview)
 
 [Short Introduction to SRT Packet Structure](#short-introduction-to-srt-packet-structure)
 
 [Handshake Structure](#handshake-structure)
 
-[The "UDT Legacy" and "SRT Extended" Handshakes](#the-"udt-legacy"-and-"srt-extended"-handshakes)
+[The "UDT Legacy" and "SRT Extended" Handshakes](#the-udt-legacy-and-srt-extended-handshakes)
 
-  [UDT Legacy Handshake](#udt--legacy-handshake)
-
-
+  [UDT Legacy Handshake](#udt-legacy-handshake)
 
 #Overview
 
