@@ -3,19 +3,14 @@ SRT Handshake
 
 **Contents**
 
-[Overview](#overview)
+- [Overview](#overview) 
+- [Short Introduction to SRT Packet Structure](#short-introduction-to-srt-packet-structure)
+- [Handshake Structure](#handshake-structure)
+- [The "UDT Legacy" and "SRT Extended" Handshakes](#the-udt-legacy-and-srt-extended-handshakes)
+  - [UDT Legacy Handshake](#udt-legacy-handshake)
+    - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
 
-[Short Introduction to SRT Packet Structure](#short-introduction-to-srt-packet-structure)
-
-[Handshake Structure](#handshake-structure)
-
-[The "UDT Legacy" and "SRT Extended" Handshakes](#the-udt-legacy-and-srt-extended-handshakes)
-
-- [UDT Legacy Handshake](#udt-legacy-handshake)
-
-  - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
-
-# Overview
+## Overview
 
 SRT is a connection protocol, and as such it embraces the concepts of "connection"
 and "session". The UDP system protocol is used by SRT for sending data as well as
@@ -72,7 +67,7 @@ specified SRT socket (not the whole application!)
  - *Peer* is the opposite Party that is (possibly about to be) connected to an
 *Agent*
 
-# Short Introduction to SRT Packet Structure
+## Short Introduction to SRT Packet Structure
 
 Every UDP packet carrying SRT traffic contains an SRT header, which
 consists of the 4 following 32-bit major fields:
@@ -125,7 +120,7 @@ don't use it.
 
 
 
-# Handshake Structure
+## Handshake Structure
 
 The handshake structure contains the following 32-bit fields in order:
 
@@ -199,7 +194,7 @@ field is 5 from the very beginning, and the `Type` field is set, the rules of
 HSv5 apply. But if one party is using version 4, the handshake continues as HSv4.
 
 
-# The "UDT Legacy" and "SRT Extended" Handshakes
+## The "UDT Legacy" and "SRT Extended" Handshakes
 
 ### UDT Legacy Handshake
 
@@ -330,8 +325,8 @@ from the different sources and to set it on both parties (note that AES-128 is t
 default).
 
 
-The Caller-Listener Handshake
------------------------------
+## The Caller-Listener Handshake
+
 
 This section describes the handshaking process where a Listener is
 waiting for an incoming packet on a bound UDP port, which should be an SRT
@@ -440,8 +435,7 @@ have precedence over the Caller is the advertised `PBKEYLEN` in the
 agreed to be the greater of those reported by each party.
 
 
-The Rendezvous Handshake
-------------------------
+## The Rendezvous Handshake
 
 When two parties attempt to connect in Rendezvous mode, they are considered to be 
 equivalent: Both are connecting, but none of them is listening, and they expect
@@ -708,8 +702,7 @@ HSv5 client is already aware that the peer is HSv4 and fills the fields of the
 conclusion handshake message according to the rules of HSv4.
 
 
-The SRT Extended Handshake
---------------------------
+## The SRT Extended Handshake
 
 ### HSv4 Extended Handshake Process
 
@@ -1152,4 +1145,6 @@ retrieved using the same option. This gives the Listener a chance to decide
 what to do with this connection - such as to decide which stream to send
 in the case where the Listener is the stream Sender. This feature is not
 predicted to be used for Rendezvous connection, as it hardly makes sense.
+
+[Return to top](#srt-handshake)
 
