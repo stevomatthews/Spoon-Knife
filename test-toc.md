@@ -3,12 +3,31 @@ SRT Handshake
 
 **Contents**
 
-- [Overview](#overview) 
+- [Overview](#overview)
 - [Short Introduction to SRT Packet Structure](#short-introduction-to-srt-packet-structure)
 - [Handshake Structure](#handshake-structure)
 - [The "UDT Legacy" and "SRT Extended" Handshakes](#the-udt-legacy-and-srt-extended-handshakes)
   - [UDT Legacy Handshake](#udt-legacy-handshake)
-    - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
+  - [Initiator and Responder](#initiator-and-responder)
+  - [Request Type](#request-type)
+  - [The Type Field](#the-type-field)
+- [The Caller-Listener Handshake](#the-caller-listener-handshake)
+  - [The Induction Phase](#the-induction-phase)
+  - [The Conclusion Phase](#the-conclusion-phase)
+- [The Rendezvous Handshake](#the-rendezvous-handshake)
+  - [HSv4 Rendezvous Process](#hsv4-rendezvous-process)
+  - [HSv5 Rendezvous Process](#hsv5-rendezvous-process)
+  - [The parallel arrangement considerations](#the-parallel-arrangement-considerations)
+  - [Rendezvous Between Different Versions](#rendezvous-between-different-versions)
+- [The SRT Extended Handshake](#the-srt-extended-handshake)
+  - [HSv4 Extended Handshake Process](#hsv4-extended-handshake-process)
+  - [HSv5 Extended Handshake Process](#hsv5-extended-handshake-process)
+  - [SRT Extension Commands](#srt-extension-commands)
+    - [HSREQ and HSRSP](#hsreq-and-hsrsp)
+    - [KMREQ and KMRSP](#kmreq-and-kmrsp)
+    - [Smoother](#smoother)
+    - [Stream ID (SID)](#stream-id-(sid))
+
 
 ## Overview
 
