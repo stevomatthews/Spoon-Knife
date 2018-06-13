@@ -1,14 +1,18 @@
 SRT Handshake
 =============
-[Overview](#overview)
-[Short Introduction to SRT Packet Structure](#short-introduction-to-srt-packet-structure)
-[Handshake Structure](#handshake-structure)
-[The "UDT Legacy" and "SRT Extended" Handshakes](#the-"udt-legacy"-and-"srt-extended"-handshakes)
-  [UDT Legacy Handshake](###udt--legacy-handshake)
+[Overview](overview)
+
+[Short Introduction to SRT Packet Structure](short-introduction-to-srt-packet-structure)
+
+[Handshake Structure](handshake-structure)
+
+[The "UDT Legacy" and "SRT Extended" Handshakes](the-"udt-legacy"-and-"srt-extended"-handshakes)
+
+  [UDT Legacy Handshake](udt--legacy-handshake)
 
 
 
-#Overview
+Overview
 ---------
 
 SRT is a connection protocol, and as such it embraces the concepts of "connection"
@@ -120,7 +124,7 @@ don't use it.
 
 
 
-#Handshake Structure
+Handshake Structure
 --------------------
 
 The handshake structure contains the following 32-bit fields in order:
@@ -195,7 +199,7 @@ field is 5 from the very beginning, and the `Type` field is set, the rules of
 HSv5 apply. But if one party is using version 4, the handshake continues as HSv4.
 
 
-#The "UDT Legacy" and "SRT Extended" Handshakes
+The "UDT Legacy" and "SRT Extended" Handshakes
 ----------------------------------------------
 
 ### UDT Legacy Handshake
