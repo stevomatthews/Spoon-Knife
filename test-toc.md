@@ -1,5 +1,9 @@
 # SRT Handshake
 
+Version 1.0.0
+Published: 2018-06-12
+Last updated: 2018-06-13
+
 **Contents**
 
 - [Overview](#overview)
@@ -39,7 +43,7 @@ An SRT connection is characterized by the fact that it is:
 - first engaged by a *handshake* process
 - maintained as long as any packets are being exchanged in a timely manner
 - considered closed when a party receives the appropriate close command from
-the peer (connection closed by the foreign host), or when it receives no
+its peer (connection closed by the foreign host), or when it receives no
 packets at all for some predefined time (connection broken on timeout).
 
 Just like its predecessor UDT, SRT supports two connection configurations:
@@ -49,9 +53,10 @@ Just like its predecessor UDT, SRT supports two connection configurations:
 
 As SRT development has evolved, two handshaking mechanisms have emerged:
 
-1. the **legacy UDT handshake**, with the "SRT" part of the handshake implemented as extended control messages; this is the only mechanism in SRT versions 1.2 and 
-lower, and is known as **HSv4** (where the number 4 refers to the last UDT handshake 
-version)
+1. the **legacy UDT handshake**, with the "SRT" part of the handshake implemented 
+as extended control messages; this is the only mechanism in SRT versions 1.2 and 
+lower, and is known as **HSv4** (where the number 4 refers to the last UDT 
+handshake version)
 2. the new **integrated handshake**, known as **HSv5**, where all the required
 information concerning the connection is interchanged completely in the
 handshake process
@@ -62,7 +67,7 @@ rules. Otherwise, if both sides are at SRT version 1.3.0 or greater, *HSv5* is
 used. As the new handshake supports several features that might be mandatory
 for a particular application, it is also possible to reject an HSv4-to-HSv5
 connection by setting the `SRTO_MINVERSION` socket option. The value for this
-option is an integer with the version encoded in hex, e.g.
+option is an integer with the version encoded in hex. For example:
 
     int req_version = 0x00010300; // 1.3.0
 	srt_setsockflag(s, SRTO_MINVERSION, &req_version, sizeof(int));
@@ -70,8 +75,8 @@ option is an integer with the version encoded in hex, e.g.
 **IMPORTANT:** Your SRT application must do either of these two things:
 
 - Be *HSv4* compatible. In this case it must:
-   - **NOT** use any new features in 1.3.0 (such as bidirectional transmission
-or Stream ID)
+   - **NOT** use any new features in 1.3.0 or higher (such as bidirectional 
+   transmission or Stream ID)
    - **ALWAYS** set `SRTO_SENDER` to true on the sender side
 - Require *HSv5*. If so, it must prevent connections to any older
 versions of SRT by setting the minimum version 1.3.0 as shown above.
@@ -87,21 +92,45 @@ specified SRT socket (not the whole application!)
 
 ## Short Introduction to SRT Packet Structure
 
-Every UDP packet carrying SRT traffic contains an SRT header, which
-consists of the 4 following 32-bit major fields:
+Every UDP packet carrying SRT traffic contains an SRT header. In all versions, 
+the SRT header contains four major 32-bit fields:
 
  - `PH_SEQNO`
  - `PH_MSGNO`
  - `PH_TIMESTAMP`
  - `PH_ID`
 
-Their interpretation largely depends on the type of packet.
+Their interpretation largely depends on the type of packet. Here, for example,
+is a representation of an SRT 1.3.0 data packet header:
 
- - `PH_ID`: The **Target Socket ID** to which a packet should be dispatched, although
-it may have the special value 0 when the packet is a connection request
-- `PH_TIMESTAMP`: Usually the time when a packet was sent, although the real
-interpretation may vary depending on the type, and it's not important for the
-handshake
+```
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |0|                     Packet Sequence Number                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |FF|O|KK|R|                   Message Number                    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Time Stamp                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Destination Socket ID                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+An SRT control packet has the following structure:
+
+```
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |1|          Message Type         |    Message Extended Type    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     |                    Additional Data                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            Time Stamp                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Destination Socket ID                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
 Most important here are first two fields, the interpretation of which mainly
 depends on the most significant bit in the `PH_SEQNO` major field:
@@ -109,9 +138,18 @@ depends on the most significant bit in the `PH_SEQNO` major field:
 - 0: Data (payload) packet
 - 1: Control packet
 
-Details for Data packets will be discussed in the sections below covering **extension flags**. 
+In **Data** packets, the third and fourth fields are interpreted as follows:
 
-For Control packets these two fields are interpreted respectively as:
+- `PH_TIMESTAMP`: Usually the time when a packet was sent, although the real
+interpretation may vary depending on the type, and it's not important for the
+handshake
+- `PH_ID`: The **Destination Socket ID** to which a packet should be dispatched, 
+ although it may have the special value 0 when the packet is a connection request
+
+Additional details for Data packets will be discussed in the sections below 
+covering **extension flags**. 
+
+For **Control** packets the first two fields are interpreted respectively as:
 
  - `PH_SEQNO`:
    - Bit 31: set
@@ -122,17 +160,17 @@ For Control packets these two fields are interpreted respectively as:
 
 The type subfields (in the `PH_SEQNO` field) are used in two ways:
 
-1. The **Message Type** is one of the values enumerated as `UDTMessageType`, except
-`UMSG_EXT`. In this case, the type is determined by this value only, and the
-**Message Extended Type** value should always be 0.
-2. The **Message Type** is `UMSG_EXT`. In this case the actual message type is contained
-in the **Message Extended Type**.
+1. The **Message Type** is one of the values enumerated as `UDTMessageType`, 
+except `UMSG_EXT`. In this case, the type is determined by this value only, and 
+the **Message Extended Type** value should always be 0.
+2. The **Message Type** is `UMSG_EXT`. In this case the actual message type is 
+contained in the **Message Extended Type**.
 
 The **Extended Message** mechanism is theoretically open for further extensions. 
 SRT uses some of them for its own purposes. This will be referred to later in the 
 section on the **SRT Extended Handshake**.
 
-The `Additional data` field is used in some control messages as extra space for 
+The `Additional Data` field is used in some control messages as extra space for 
 data. Its interpretation depends on the particular message type. Handshake messages
 don't use it.
 
@@ -155,6 +193,62 @@ The handshake structure contains the following 32-bit fields in order:
 | `Cookie`          | Cookie used for various processing (see below)                                                                                                          |
 | `PeerIP`          | (Four 32-bit fields) This field is a placeholder for the sender's IP address, either IPv4 or IPv6, but is not actually used for anything in HSv4        |
 
+Here is a representation of the HSv4 handshake structure:
+
+```
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        UDT Version {4}                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Socket Type                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                Initial Packet Sequence Number                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                      Maximum Packet Size                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Maximum Flow Window Size                   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Connection Type                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           Socket ID                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           SYN Cookie                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Peer IP Address                        |
+   |                                                               |
+   |                                                               |
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+And here is the HSv5 handshake structure:
+
+```
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        UDT Version {5}                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       Encryption Flags        |        Extension Flags        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                Initial Packet Sequence Number                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                      Maximum Packet Size                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Maximum Flow Window Size                   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Connection Type                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           Socket ID                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           SYN Cookie                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Peer IP Address                        |
+   |                                                               |
+   |                                                               |
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
 
 The HSv4 (UDT-legacy based) handshake is based on two rules:
@@ -184,7 +278,7 @@ As of SRT version 1.3.0 with HSv5 the handshake must only satisfy the minimum
 size. However, the code cannot rely on this until each peer is certain about
 the SRT version of the other.
 
-Even in HSv5, the Caller must first set two fields in the initial handshake
+Even in HSv5, the **Caller** must first set two fields in the initial handshake
 message:
 - `m_iVersion` = 4
 - `m_iType` = `UDT_DGRAM`
@@ -231,19 +325,20 @@ agreed upon at the moment when the connection is established.
 
 ### Initiator and Responder
 
-The handshake change necessitates the introduction of two new terms: "Initiator" 
-and "Responder", which are interpreted differently in HSv4 and HSv5 handshakes.
+The addition of a new handshake mechanism necessitates the introduction of two 
+new terms: "Initiator" and "Responder", which are interpreted differently in 
+HSv4 and HSv5 handshakes.
 
-- **Initiator:** starts the extended SRT handshake process and sends appropriate
+- **Initiator:** Starts the extended SRT handshake process and sends appropriate
 SRT extended handshake requests
-- **Responder:** expects the SRT extended handshake requests to be sent by the
+- **Responder:** Expects the SRT extended handshake requests to be sent by the
 Initiator and sends SRT extended handshake responses back
 
 There are two basic types of SRT handshake extensions that are exchanged in both
 handshake versions (HSv5 introduces some more extensions):
 
 - `SRT_CMD_HSREQ`: Exchanges the basic SRT information
-- `SRT_CMD_KMREQ`: Exchanges the Wrapped Stream Encryption Key (used only if
+- `SRT_CMD_KMREQ`: Exchanges the wrapped stream encryption key (used only if
 encryption is requested)
 
 The **Initiator** and **Responder** roles are assigned differently in *HSv4*
@@ -256,9 +351,9 @@ socket option to true.
 - **Responder** is the receiver, which is that party that has set `SRTO_SENDER` 
 to false (default).
 
-Note that:
-- these roles are independent of the connection mode (Caller/Listener/Rendezvous)
-- the behavior is undefined if `SRTO_SENDER` has the same value on both parties
+Note that these roles are independent of the connection mode 
+(Caller/Listener/Rendezvous), and that the behavior is undefined if `SRTO_SENDER` 
+has the same value on both parties
 
 For an **HSv5** handshake, the roles are dependent on the connection mode:
 
@@ -266,8 +361,9 @@ For an **HSv5** handshake, the roles are dependent on the connection mode:
    - the Caller is the **Initiator**
    - the Listener is the **Responder**
 - For Rendezvous connections:
-   - The **Initiator** and **Responder** roles are assigned basing on the initial
-data interchange during the handshake (see **The Rendezvous Handshake** below)
+   - The **Initiator** and **Responder** roles are assigned based on the initial
+data interchange during the handshake 
+(see [**The Rendezvous Handshake**](#the-rendezvous-handshake) below)
 
 Note that if the handshake can be done as HSv5, the connection is always
 considered bidirectional and the `SRTO_SENDER` flag is unused.
@@ -277,8 +373,8 @@ considered bidirectional and the `SRTO_SENDER` flag is unused.
 
 ### Request Type
 
-The `ReqType` field in the **Handshake Structure** (see above) indicates the
-handshake message type.
+The `ReqType` field in the **Handshake Structure** (see [above](#handshake-structure)) 
+indicates the handshake message type.
 
 **Caller-Listener Request Types:**
 
@@ -308,12 +404,15 @@ the following circumstances:
  - in an `URQ_INDUCTION` message sent initially by the Caller
  - in an `URQ_INDUCTION` message sent back by the HSv4 Listener 
  - in an `URQ_CONCLUSION` message, if the other party was detected as HSv4
+ 
+For more information on Induction and Conclusion see the 
+[Caller-Listener Handshake](#the-caller-listener-handshake) section below.
 
-**NOTE:** UDT interpreted the `m_iType` field as a **Stream** or **Message** type, and rejected the connection
-if the parties each used a different type. Since SRT only uses the **Message**
-type, HSv5 uses only the `UDT_DGRAM` value for this field in cases
-where the message is going to be sent to an HSv4 party, and it is known that these fields will be interpreted for this
-kind of message.
+**NOTE:** UDT interpreted the `m_iType` field as a **Stream** or **Message** type, 
+and rejected the connection if the parties each used a different type. Since SRT 
+only uses the **Message** type, HSv5 uses only the `UDT_DGRAM` value for this field 
+in cases where the message is going to be sent to an HSv4 party, and it is known 
+that these fields will be interpreted for this kind of message.
 
 In all other cases `m_iType` uses the HSv5 interpretation and consists of the
 following:
@@ -321,39 +420,47 @@ following:
 - a lower 16-bit field reserved for **extension flags**
 
 The **extension flags** field should have the following value:
- - in an `URQ_CONCLUSION` message, it should contain the combination
-of extension flags (`HS_EXT_` prefix)
+ - in an `URQ_CONCLUSION` message, it should contain a combination
+of extension flags (with the `HS_EXT_` prefix)
  - in an `URQ_INDUCTION` message sent back by the Listener it should contain
 `SrtHSRequest::SRT_MAGIC_CODE` (0x4A17)
  - in all other cases it should be 0.
 
-The **encryption flags** currently occupy only 3 bits and they comprise a
-declaration of "advertised PB key length". Whichever site declares the
-`PBKEYLEN` will be advertising it. Therefore this will contain the value taken
-from the `SRTO_PBKEYLEN` option, divided by 8, so the possible values are:
+The **encryption flags** currently occupy only 3 out of 16 bits, which are used 
+to advertise a value for `PBKEYLEN` (packet based key length). This value is taken
+from the `SRTO_PBKEYLEN` option, divided by 8, giving possible values of:
  - 2 (AES-128)
  - 3 (AES-192)
  - 4 (AES-256)
  - 0 (PBKEYLEN not advertised)
 
-The `PBKEYLEN` advertisement is required due to the fact that the Sender
-should decide the `PBKEYLEN`, but in HSv5 the Sender might be the Responder. Therefore
-`PBKEYLEN` is advertised to the Initiator so that it gets this value
-before it starts creating the SEK on its side, to be then sent to the Responder.
+The `PBKEYLEN` advertisement is required due to the fact that while the Sender
+should decide the `PBKEYLEN`, in HSv5 the Sender might be the Responder. Therefore
+`PBKEYLEN` is advertised to the Initiator so that it gets this value before it 
+starts creating the SEK on its side, to be then sent to the Responder.
 
-The specification of `PBKEYLEN` is decided by the sender.
-When the transmission is bidirectional, this value must be agreed upon at the 
-outset because when both are set, the Responder wins. For Caller-Listener
-connections it is reasonable to set this value on the Listener only. In
-the case of Rendezvous the only reasonable approach is to decide upon the correct value
-from the different sources and to set it on both parties (note that AES-128 is the
-default).
+**REMINDER:** Initiator and Responder roles are assigned differently in HSv4 and HSv5.
+
+- For HSv4:
+  - Initiator = `SRTO_SENDER` socket option set to true.
+  - Responder = `SRTO_SENDER` socket option set to false.
+- For HSv5:
+  - Initiator = Caller (but may be Listener during Rendezvous handshake)
+  - Responder = Listener (but may be Caller during Rendezvous handshake)
+
+See the section on [Initiator and Responder](#initiator-and-responder) above.
+
+The specification of `PBKEYLEN` is decided by the Sender.When the transmission 
+is bidirectional, this value must be agreed upon at the outset because when both 
+are set, the Responder wins. For Caller-Listener connections it is reasonable to 
+set this value on the Listener only. In the case of Rendezvous the only reasonable 
+approach is to decide upon the correct value from the different sources and to 
+set it on both parties (note that **AES-128** is the default).
 
 [Return to top of page](#srt-handshake)
 
 
 ## The Caller-Listener Handshake
-
 
 This section describes the handshaking process where a Listener is
 waiting for an incoming packet on a bound UDP port, which should be an SRT
@@ -366,13 +473,13 @@ handshake command (`UMSG_HANDSHAKE`) from a Caller. The process has two phases:
 The Caller begins by sending an "induction" message, which contains the following 
 (significant) fields:
 
-- **Version:** must always contain 4
+- **Version:** must always be 4
 - **Type:** `UDT_DGRAM` (2)
 - **ReqType:** `URQ_INDUCTION`
 - **ID:** Agent's socket ID
 - **Cookie:** 0
 
-The target socket ID (in the SRT header) in this message is 0, which is
+The **Destination Socket ID** (in the SRT header) in this message is 0, which is
 interpreted as a connection request.
 
 **NOTE:** This phase serves only to set a cookie on the Listener so that it 
@@ -394,8 +501,9 @@ An **HSv5** Listener responds with the following:
 - **Cookie:** a cookie that is crafted based on host, port and current time with 
 1 minute accuracy
 
-**NOTE:** The HSv5 Listener still doesn't know the version of the Caller and it
-responds with the same set of values regardless of whether the Caller is version 4 or 5.
+**NOTE:** The HSv5 Listener still doesn't know the version of the Caller, and it
+responds with the same set of values regardless of whether the Caller is 
+version 4 or 5.
 
 The important differences between HSv4 and HSv5 in this respect are:
 
@@ -409,9 +517,10 @@ receives the value 5 in `Version`, it understands that it comes from an HSv5
 party, so it knows that it should prepare the proper HSv5 messages in the next
 phase.  It also checks the following in the `Type` field:
 	- whether the lower 16-bit field (extension flags) contains the magic
-value (see "The Type Field" section above), otherwise the connection is rejected. This is a contingency for the case
-where someone who, in attempting to extend UDT independently, increases the
-`Version` value to 5 and tries to test it against SRT.
+value (see the [Type Field](#the-type-field) section above); otherwise the 
+connection is rejected. This is a contingency for the case where someone who, 
+in attempting to extend UDT independently, increases the `Version` value to 5 
+and tries to test it against SRT.
     - whether the upper 16-bit field (encryption flags) contain a non-zero
 value, which is interpreted as an advertised `PBKEYLEN` (in which case it is
 written into the value of the `SRTO_PBKEYLEN` option).
@@ -424,71 +533,71 @@ written into the value of the `SRTO_PBKEYLEN` option).
 Once the Caller gets his cookie, it sends the `URQ_CONCLUSION` handshake
 message to the Listener.
 
-The following values are set by the HSv4 Caller. The same values must
-be used by the HSv5 Caller when the Listener has returned Version 4 in
+The following values are set by an HSv4 Caller. Note that the same values must
+be used by an HSv5 Caller when the Listener has returned Version 4 in
 its `URQ_INCUDTION` response:
 
 - **Version:** 4
 - **Type:** `UDT_DGRAM` (SRT must have this legacy UDT socket type only)
 - **ReqType:** `URQ_CONCLUSION`
 - **ID:** Agent's socket ID
-- **Cookie:** a cookie previously received in the induction phase
+- **Cookie:** the cookie previously received in the induction phase
 
-If an HSv5 Caller receives a confirmation from a Listener that it can use the version 5
-handshake, it fills in the following values:
+If an HSv5 Caller receives a confirmation from a Listener that it can use the 
+version 5 handshake, it fills in the following values:
 
 - **Version:** 5
-- **Type:** Appropriate  and Encryption Flags (see below)
+- **Type:** Appropriate Extension Flags and Encryption Flags (see below)
 - **ReqType:** `URQ_CONCLUSION`
 - **ID:** Your socket ID  **<-- whose socket ID is this???**
 - **Cookie:** the cookie previously received in the induction phase
 
-The target socket ID (in the SRT header, `PH_ID` field) in this message is the
+The Destination Socket ID (in the SRT header, `PH_ID` field) in this message is the
 socket ID that was previously received in the induction phase in the `ID` field
 in the handshake structure.
 
 The **Type** field contains:
 
-- Encryption Flags: advertised PBKEYLEN (see above)
-- Extension Flags: The `HS_EXT_` prefixed flags defined in `CHandShake`, see
-  **SRT Extended Handshake** section below.
+- Encryption Flags: advertised `PBKEYLEN` (see above)
+- Extension Flags: The `HS_EXT_` prefixed flags defined in `CHandShake` — see the
+  **[SRT Extended Handshake](#the-srt-extended-handshake)** section below.
 
 The Listener responds with the same values shown above, without the cookie (which 
 isn't needed here), as well as the extensions for HSv5 (which will probably be 
 exactly the same).
 
-**IMPORTANT:** There isn't any "negotiation" here. If the
-values passed in the handshake are in any way not acceptable by the other side,
-the connection will be rejected. The only case when the Listener can
-have precedence over the Caller is the advertised `PBKEYLEN` in the
-`Encryption Flags` field in `Type` field. The value for latency is always
-agreed to be the greater of those reported by each party.
+**IMPORTANT:** There isn't any "negotiation" here. If the values passed in the 
+handshake are in any way not acceptable by the other side, the connection will 
+be rejected. The only case when the Listener can have precedence over the Caller 
+is the advertised `PBKEYLEN` in the `Encryption Flags` field in `Type` field. 
+The value for latency is always agreed to be the greater of those reported 
+by each party.
 
 [Return to top of page](#srt-handshake)
 
 
 ## The Rendezvous Handshake
 
-When two parties attempt to connect in Rendezvous mode, they are considered to be 
-equivalent: Both are connecting, but none of them is listening, and they expect
-to be contacted (over the same port number on each party) only by the exactly
-same party that they try to connect to. Therefore it's perfectly safe to assume
-each party has agreed upon the connection, and that no induction-conclusion
-phase split is required as a safety precaution. Even so, the Rendezvous
+When two parties attempt to connect in **Rendezvous** mode, they are considered 
+to be  equivalent: Both are connecting, but neither is listening, and they expect 
+to be  contacted (over the same port number on each party) only by exactly the 
+same party that they try to connect to. Therefore, it's perfectly safe to assume 
+that, at  some point, each party will have agreed upon the connection, and that 
+no induction-conclusion phase split is required. Even so, the Rendezvous 
 handshake process is more complicated.
 
-The base statements for Rendezvous handshake are the same in HSv4 and HSv5,
-however HSv5 has more data to exchange and more conditions to be taken into
-account and this makes this process more complicated. You can consider the HSv4
-process description to be an introduction for HSv5, though.
+The basics of a Rendezvous handshake are the same in HSv4 and HSv5 — the 
+description of the HSv4 process is a good introduction for HSv5. However, HSv5
+has more data to exchange and more conditions to be taken into account, making 
+the process more complicated. 
 
 [Return to top of page](#srt-handshake)
 
 
 ### HSv4 Rendezvous Process
 
-In the beginning, both parties are sending an SRT control message to each other,
-of type `UMSG_HANDSHAKE` with the following fields:
+In the beginning, each party is sending an SRT control message of type 
+`UMSG_HANDSHAKE` to the other, with the following fields:
 
 - **Version:** 4 (HSv4 only)
 - **Type:** `UDT_DGRAM` (HSv4 only)
@@ -496,16 +605,16 @@ of type `UMSG_HANDSHAKE` with the following fields:
 - **ID:** Agent's socket ID
 - **Cookie:** 0
 
-When the `srt_connect()` function is first called by the application each party
+When the `srt_connect()` function is first called by an application, each party
 sends this message to its peer, and then tries to read a packet from its
 underlying UDP socket to see if the other party is alive. Upon reception of an
-`UMSG_HANDSHAKE` message, each party initiates the second, conclusion phase by
+`UMSG_HANDSHAKE` message, each party initiates the second (conclusion) phase by
 sending this message:
 
 - **Version:** 4
 - **Type:** `UDT_DGRAM`
 - **ReqType:** `URQ_CONCLUSION`
-- **ID:** Your socket ID
+- **ID:** Your socket ID  **<-- who is this referring to???**
 - **Cookie:** 0
 
 At this point, they are considered to be connected. When either party receives 
@@ -516,7 +625,7 @@ messages (note that this is UDP, so neither party can assume that the message
 has reached its peer).
 
 With HSv4 there's no debate about who is the Initiator and who is the Responder 
-because  this transaction is unidirectional, so the party that has set the 
+because this transaction is unidirectional, so the party that has set the 
 `SRTO_SENDER` flag is the Initiator and the other is Responder (as is usual 
 with HSv4).
 
@@ -525,27 +634,27 @@ with HSv4).
 
 ### HSv5 Rendezvous Process
 
-This process introduces a state machine and therefore is slightly different 
-from HSv4, although it is still based on the same message request types. Both 
-parties start with `URQ_WAVEAHAND` and use a `Version` value of 5. The version 
-recognition is easy -- the HSv4 client does not look at the `Version` value, 
+The HSv5 Rendezvous process introduces a state machine, and therefore is slightly 
+different from HSv4, although it is still based on the same message request types. 
+Both parties start with `URQ_WAVEAHAND` and use a `Version` value of 5. The 
+version recognition is easy — the HSv4 client does not look at the `Version` value, 
 whereas HSv5 clients can quickly recognize the version from the `Version` field.
 The parties only continue with the HSv5 Rendezvous process when `Version` = 5
-for both, otherwise the process continues exclusively according to *HSv4* rules.
+for both. Otherwise the process continues exclusively according to *HSv4* rules.
 
-With HSv5 Rendezvous, both parties create a cookie. This is necessary
-for the Initiator and Responder roles assignment -- a process called a 
-"cookie contest". Each party generates a cookie value (a 32-bit number) out of
-host, port, and current time with 1 minute accuracy, scrambled next by MD5
-sum calculation. This cookie value is then compared with one another.
+With HSv5 Rendezvous, both parties create a cookie for a process called a 
+"cookie contest". This is necessary for the assignment of Initiator and Responder 
+roles. Each party generates a cookie value (a 32-bit number) based on the host, 
+port, and current time with 1 minute accuracy. This value is then scrambled using
+an MD5 sum calculation. The cookie values are then compared with one another.
 
 Since you can't have two sockets on the same machine bound to the same device
 and port and operating independently, it's virtually impossible that the
 parties will generate identical cookies. Nonetheless, there is a simple
 fallback for when they appear to be equal, which is that the connection will
 not be made until the cookies are regenerated (which should happen after a
-minute or so). This situation might occur, however, when a user mistakenly
-specified the connection target as localhost.
+minute or so). This situation might occur, however, if a user mistakenly
+specifies the connection target as `localhost`.
 
 When one party's cookie value is greater than its peer's, it wins the cookie 
 contest and becomes Initiator (the other party becomes the Responder).
@@ -554,15 +663,19 @@ At this point there are two conditions possible (at least theoretically):
 *parallel*  and *serial*. 
 
 The **parallel** condition only occurs if the messages with `URQ_WAVEAHAND` are 
-sent and received by both peers at precisely the same time - which may happen
-when they either start perfectly simultaneously, or when the second starts
-perfectly simultaneously with the other party sending the repeated Waveahand
-message. More precisely, they either send their messages at perfectly the same
-time, or the party that is later sends its message at the time fitting in
-a time gap between the moment when the "earlier" party has sent the message,
-and when this message is received - every party received the message from
-its peer exactly after they sent theirs. It's a very rare case, although
-predicted in the SRT processing.
+sent and received by both peers at precisely the same time. This *might* happen
+in either of two situations:
+- if both parties start sending `URQ_WAVEAHAND` messages perfectly simultaneously, 
+or 
+- if the party B starts later but sends its `URQ_WAVEAHAND` message during the 
+gap between the moment when the "earlier" party A had sent its message,
+and the moment when that message is received (that is, if each party receive the 
+message from its peer immediately after having sent its own). 
+While these are very rare cases, they have been accounted for in SRT processing.
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 In the **serial** condition, one party is always first, and the other follows.
 That is, while both parties are repeatedly sending `URQ_WAVEAHAND` messages, at
