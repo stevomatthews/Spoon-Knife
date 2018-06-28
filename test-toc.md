@@ -29,7 +29,7 @@ Last updated: 2018-06-28
     - [HSREQ and HSRSP](#hsreq-and-hsrsp)
     - [KMREQ and KMRSP](#kmreq-and-kmrsp)
     - [Smoother](#smoother)
-    - [Stream ID (SID)](#stream-id-(sid))
+    - [Stream ID (SID)](#stream-id-sid)
 
 
 ## Overview
