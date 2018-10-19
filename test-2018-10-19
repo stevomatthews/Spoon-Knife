@@ -1,0 +1,200 @@
+### SRT Version History & Compatibility
+
+SRT is designed to be backwards compatible, so that new or upgraded
+Haivision products will be able to support SRT interactions with older
+ones. Note, however, that newer versions of SRT may have features
+unavailable on older ones.
+
+The table below shows the availability of SRT on various versions of
+Haivision products:
+
++--------+--------+--------+--------+--------+--------+--------+--------+
+|        | > SRT  |        |        |        |        |        |        |
+|        | > Vers |        |        |        |        |        |        |
+|        | ion    |        |        |        |        |        |        |
++========+========+========+========+========+========+========+========+
+|        | > 1.0. | > 1.0. | > 1.0. | > 1.1. | > 1.1. | > 1.1. | > 1.1. |
+|        | 4      | 5      | 7      | 0      | 2      | 3      | 4      |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Prod | > Prod |        |        |        |        |        |        |
+| ucts   | uct    |        |        |        |        |        |        |
+|        | > Vers |        |        |        |        |        |        |
+|        | ion    |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Caly |        |        | > 2.0  |        |        |        | > 2.2  |
+| pso    |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Caly |        |        | > 1.01 |        |        | > 1.02 |        |
+| pso    |        |        |        |        |        |        |        |
+| > Mobi |        |        |        |        |        |        |        |
+| le     |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > InSt |        | > 1.2  |        |        |        | > 1.2. |        |
+| ream   |        |        |        |        |        | 1      |        |
+| > Mobi |        |        |        |        |        |        |        |
+| le     |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Kula |        | > 4.4  |        |        |        | > 4.5  | > 5.0  |
+| Byte   |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Maki | > 1.0  | > 1.1. |        | > 1.1. | > 1.2  |        |        |
+| to     |        | 0      |        | 2      |        |        |        |
+| > X    |        | >      |        |        |        |        |        |
+| > Deco |        | > 1.1. |        |        |        |        |        |
+| der    |        | 1      |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Maki | > 1.2  | > 1.3  |        | > 1.4  | > 1.5  |        |        |
+| to     |        |        |        |        |        |        |        |
+| > X    |        |        |        |        |        |        |        |
+| > Enco |        |        |        |        |        |        |        |
+| der    |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+| > Medi |        | > 1.0  | > 1.1  |        |        | > 1.2  | > 1.3  |
+| a      |        |        |        |        |        |        |        |
+| > Gate |        |        |        |        |        |        |        |
+| way    |        |        |        |        |        |        |        |
++--------+--------+--------+--------+--------+--------+--------+--------+
+
+1.  iOS version
+
+2.  Android version
+
+### Basic SRT Concepts
+
+#### Source & Destination
+
+The SRT protocol relies on bi-directional UDP traffic to optimize video
+streaming over public networks. In addition to the video data that is
+sent in one direction --- from a content **source** device (such as a
+Makito X Encoder) to a **destination** (such as a Makito X Decoder)
+
+--- there is a constant exchange of control information between the two
+endpoints, including "keep alive" packets (if needed) approximately
+every 10 ms, which enable SRT streams to be automatically restored after
+a connection loss.
+
+![](media/image1.png){width="5.479378827646544in"
+height="1.4296872265966754in"}
+
+NOTE It is important to understand that with an SRT stream, the
+**source** is the device that is *sending* the content (audio and/or
+video data), while the **destination** is the device *receiving* the
+content. Elsewhere, you may encounter references to an *SRT sender* and
+an *SRT receiver*, but to avoid confusion in this document we will be
+using the terms **source** and **destination**.
+
+In some cases, a device can act as both the **source** and the
+**destination**. For example, a Haivision Media Gateway may act as a
+**destination** while receiving an SRT stream from a Makito X Encoder,
+and then become a **source** device as it re-streams to a Makito X
+Decoder.
+
+#### SRT Call Modes
+
+In order to establish a bidirectional stream, SRT employs a handshake
+mechanism where each device identifies itself as a **Caller** or as a
+**Listener**. In certain cases, two devices can simultaneously negotiate
+an SRT session in what is referred to as **Rendezvous** mode. As you are
+configuring SRT streams, you should understand these handshaking modes
+and when to apply them:
+
++-----------------------+-----------------------+-----------------------+
+| > SRT Call Mode       | > What it does        | > When to use it      |
++=======================+=======================+=======================+
+| > Caller              | > Sets a **source**   | (1) To initiate       |
+|                       | > or **destination**  |     point-to-point    |
+|                       | > device as the       |     streaming (e.g.   |
+|                       | > initiator of an SRT |     set a Makito X    |
+|                       | > streaming session.  |     Encoder to Caller |
+|                       | > The Caller device   |     mode to stream to |
+|                       | > must know the       |     a Makito X        |
+|                       | > public IP address   |     Decoder over a    |
+|                       | > and port number of  |     private network,  |
+|                       | > the Listener.       |     or vice versa).   |
+|                       |                       |                       |
+|                       |                       | (2) On a **source**   |
+|                       |                       |     or                |
+|                       |                       |     **destination**   |
+|                       |                       |     device that is    |
+|                       |                       |     behind a          |
+|                       |                       |     firewall; may     |
+|                       |                       |     require a network |
+|                       |                       |     administrator to  |
+|                       |                       |     configure the     |
+|                       |                       |     firewall          |
+|                       |                       |     settings.         |
+|                       |                       |                       |
+|                       |                       | (3) On a **source**   |
+|                       |                       |     or                |
+|                       |                       |     **destination**   |
+|                       |                       |     device that is    |
+|                       |                       |     not behind a      |
+|                       |                       |     firewall.         |
+|                       |                       |                       |
+|                       |                       | (4) On a **source**   |
+|                       |                       |     or                |
+|                       |                       |     **destination**   |
+|                       |                       |     device with a     |
+|                       |                       |     dynamic IP        |
+|                       |                       |     address (e.g. a   |
+|                       |                       |     portable encoder  |
+|                       |                       |     using DHCP).      |
++-----------------------+-----------------------+-----------------------+
+| > Listener            | > Sets a device to    | (1) To participate in |
+|                       | > wait for a request  |     a point-to-point  |
+|                       | > to start an SRT     |     streaming session |
+|                       | > streaming session.  |     initiated by a    |
+|                       | > The Listener device |     Caller (e.g. set  |
+|                       | > only needs to know  |     a Makito X        |
+|                       | > that it should      |     Decoder to        |
+|                       | > listen for an SRT   |     Listener mode to  |
+|                       | > stream on a certain |     receive an SRT    |
+|                       | > port.               |     stream from a     |
+|                       |                       |     Makito X          |
+|                       |                       |     Encoder).         |
+|                       |                       |                       |
+|                       |                       | (2) On a **source**   |
+|                       |                       |     or                |
+|                       |                       |     **destination**   |
+|                       |                       |     device that is    |
+|                       |                       |     behind a firewall |
+|                       |                       |     over which you    |
+|                       |                       |     have control and  |
+|                       |                       |     can open a port.  |
+|                       |                       |                       |
+|                       |                       | (3) On a **source**   |
+|                       |                       |     or                |
+|                       |                       |     **destination**   |
+|                       |                       |     device that is    |
+|                       |                       |     not behind a      |
+|                       |                       |     firewall, or      |
+|                       |                       |     exposed directly  |
+|                       |                       |     on the Internet.  |
+|                       |                       |                       |
+|                       |                       | (4) You know that     |
+|                       |                       |     another device    |
+|                       |                       |     will initiate the |
+|                       |                       |     session.          |
++-----------------------+-----------------------+-----------------------+
+| > Rendezvous          | > Allows two devices  | > \(1) When one or    |
+|                       | > to negotiate an SRT | > both devices are    |
+|                       | > session over a      | > behind firewalls.   |
+|                       | > mutually agreed     | > Once certain        |
+|                       | > upon port. Both     | > settings are in     |
+|                       | > **source** and      | > place on the        |
+|                       | > **destination**     | > firewall, SRT       |
+|                       | > must be in          | > sessions can be     |
+|                       | > Rendezvous mode.    | > initiated without   |
+|                       |                       | > further             |
+|                       |                       | > intervention by a   |
+|                       |                       | > network             |
+|                       |                       | > administrator.      |
++-----------------------+-----------------------+-----------------------+
+
+The following screenshots show where the SRT Call Mode is selected in
+the Web interface:
+
+> Figure 1 SRT Call Mode menu in KulaByte 4.5
+
+![](media/image2.png){width="6.48161198600175in"
+height="7.532811679790027in"}
