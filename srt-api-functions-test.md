@@ -18,9 +18,9 @@ SRT API Functions
   * [srt_connect](#srt_connect)
   * [srt_connect_debug](#srt_connect_debug)
   * [srt_rendezvous](#srt_rendezvous)
-- [Options and properties](#Options-and-properties)
+- [**Options and properties**](#Options-and-properties)
   * [srt_getpeername](#srt_getpeername)
-  * [srt_getsockname](srt_getsockname)
+  * [srt_getsockname](#srt_getsockname)
 
 <br><br>
 
