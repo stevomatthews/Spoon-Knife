@@ -1,12 +1,15 @@
 SRT API Functions
 =================
 
-* [**Library Initialization**](#Library-Initialization)
-  - [srt_startup](#srt_startup)
-  - [srt_cleanup](#srt_cleanup)
-* [**Creating and configuring sockets**](#Creating-and-configuring-sockets)
-  - [srt_socket](#srt_socket)
-  - [srt_bind](#srt_bind)
+- [**Library Initialization**](#Library-Initialization)
+  * [srt_startup](#srt_startup)
+  * [srt_cleanup](#srt_cleanup)
+- [**Creating and configuring sockets**](#Creating-and-configuring-sockets)
+  * [srt_socket](#srt_socket)
+  * [srt_bind](#srt_bind)
+  * [srt_create_socket](#srt-create-socket)
+  * [srt_bind_peerof](#srt-bind-peerof)
+  * [srt_getsockstate](#srt-getsockstate)
 
 Library initialization
 ----------------------
@@ -29,22 +32,25 @@ this behavior is strongly discouraged.
 
 - Errors:
   * `SRT_ECONNSETUP` (with error code set): Reported when required system
-resource(s) failed to initialize. This is currently used only on Windows to report
-a failure from `WSAStartup`.<br><br>
+resource(s) failed to initialize. This is currently used only on Windows to 
+report a failure from `WSAStartup`.
+
+<br><br>
 
 #### srt_cleanup
 ```
 int srt_cleanup(void);
 ```
 
-This function cleans up all global SRT resources and shall be called just before exiting
-the application that uses the SRT library.
+This function cleans up all global SRT resources and shall be called just before 
+exiting the application that uses the SRT library.
 
 - Returns: 
   * 0 = for future use
 
-**IMPORTANT**: Note that the startup/cleanup calls have an instance counter. This means
-that if you call `srt_startup` multiple times, you need to call the `srt_cleanup` function exactly the same number of times.
+**IMPORTANT**: Note that the startup/cleanup calls have an instance counter.
+This means that if you call `srt_startup` multiple times, you need to call the 
+`srt_cleanup` function exactly the same number of times.
 
 Creating and configuring sockets
 -------------------------------
@@ -59,11 +65,11 @@ Creates an SRT socket:
 * `af`: family (either `AF_INET` or `AF_INET6`)
 * `type`, `protocol`: ignored
 
-**NOTE:** The UDT library uses the `type` parameter to specify file or message mode by
-specifying that `SOCK_STREAM` corresponds to a TCP-like file transmission mode, and
-`SOCK_DGRAM` corresponds to an SCTP-like message transmission mode. SRT still 
-supports these modes. However, this is controlled by the `SRTO_MESSAGEAPI` socket
-option when the transmission type is file (`SRTO_TRANSTYPE` set to `SRTT_FILE`)
+**NOTE:** The UDT library uses the `type` parameter to specify file or message 
+mode by specifying that `SOCK_STREAM` corresponds to a TCP-like file transmission 
+mode, and `SOCK_DGRAM` corresponds to an SCTP-like message transmission mode. 
+SRT still supports these modes. However, this is controlled by the `SRTO_MESSAGEAPI` 
+socket option when the transmission type is file (`SRTO_TRANSTYPE` set to `SRTT_FILE`) 
 and the only reasonable value for the `type` parameter here is `SOCK_DGRAM`.
 
 - Returns:
@@ -73,8 +79,10 @@ and the only reasonable value for the `type` parameter here is `SOCK_DGRAM`.
 - Errors:
   * `SRT_ENOTBUF`: not enough memory to allocate required resources
 
-**NOTE:** This is probably a design flaw (bug?). Usually underlying system errors are
-reported by `SRT_ECONNSETUP`.<br><br>
+**NOTE:** This is probably a design flaw (bug?). Usually underlying system errors 
+are reported by `SRT_ECONNSETUP`.
+
+<br><br>
 
 ### srt_bind
 ```
@@ -87,10 +95,10 @@ is a form of `INADDR_ANY`, then it's bound to all interfaces. When the port numb
 is 0, then the port number will be system-allocated if necessary.
 
 For a listening socket this call is obligatory. It defines the network interface
-and the port where the listener should expect a call request. For a connecting socket
-this call can set up the outgoing port to be used in the communication. It is allowed
-that multiple SRT sockets share one local outgoing port, as long as `SRTO_REUSEADDR`
-is set to *true* (default).
+and the port where the listener should expect a call request. For a connecting 
+socket this call can set up the outgoing port to be used in the communication. 
+It is allowed that multiple SRT sockets share one local outgoing port, as long 
+as `SRTO_REUSEADDR` is set to *true* (default).
 
 *See **NOTE** below under* [`srt_create_socket`](#srt_create_socket).
 
@@ -102,7 +110,9 @@ is set to *true* (default).
   * `SRT_EINVOP`: Socket already bound
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
   * `SRT_ECONNSETUP`: Internal creation of a UDP socket failed 
-  * `SRT_ESOCKFAIL`: Internal configuring of a UDP socket (`bind`, `setsockopt`) failed<br><br>
+  * `SRT_ESOCKFAIL`: Internal configuring of a UDP socket (`bind`, `setsockopt`) failed
+  
+  <br><br>
 
 
 #### srt_create_socket
@@ -112,15 +122,25 @@ SRTSOCKET srt_create_socket();
 
 Creates a socket in `AF_INET` family only.
 
-**NOTE:** In future the address family may be removed from initial socket configuration,
-which will free the user from specifying it in `srt_socket`. The `srt_create_socket` function will be used for all families. The family will be specified only with the first
-`srt_bind` or `srt_connect`, and in this case `SRT_EINVPARAM` will not be used (see [`srt_bind`](#srt_bind) above).<br><br>
+**NOTE:** In future the address family may be removed from initial socket 
+configuration, which will free the user from specifying it in `srt_socket`. 
+The `srt_create_socket` function will be used for all families. The family will 
+be specified only with the first `srt_bind` or `srt_connect`, and in this case 
+`SRT_EINVPARAM` will not be used (see [`srt_bind`](#srt_bind) above).
+
+<br><br>
+
+#### srt_bind_peerof
 
 ```
 int srt_bind_peerof(SRTSOCKET u, UDPSOCKET udpsock);
 ```
 
-A version of `srt_bind` that acquires given UDP socket instead of creating one.
+A version of `srt_bind` that acquires a given UDP socket instead of creating one.
+
+<br><br>
+
+#### srt_getsockstate
 
 ```
 SRT_SOCKSTATUS srt_getsockstate(SRTSOCKET u);
@@ -137,13 +157,13 @@ that after getting a socket error report from `srt_epoll_wait`. In blocking
 mode it's not possible because `srt_connect` does not return until the
 socket is connected or failed due to timeout or interrupted call.
 * `SRTS_CONNECTED`: The socket is connected and ready for transmission.
-* `SRTS_BROKEN`: The socket was connected, but the connection got broken
-* `SRTS_CLOSING`: The socket may still be under some operation, but closing
-is requested, so no further operation will be accepted, only finishing what
-has been ordered so far
-* `SRTS_CLOSED`: The socket has been closed, just not yet wiped out by GC
+* `SRTS_BROKEN`: The socket was connected, but the connection was broken
+* `SRTS_CLOSING`: The socket may still open and active, but closing
+is requested, so no further operations will be accepted (active operations will 
+be completed before closing)
+* `SRTS_CLOSED`: The socket has been closed, but not yet removed by the GC
 thread
-* `SRTS_NONEXIST`: The given number designates no valid socket.
+* `SRTS_NONEXIST`: The specified number does not correspond to a valid socket.
 
 ```
 int srt_getsndbuffer(SRTSOCKET sock, size_t* blocks, size_t* bytes);
@@ -539,7 +559,7 @@ for a message that is next to the currently lost one, it will be delivered
 and the lost one dropped.
 
 Returns:
-* >0 Size of the data received, if successful.
+* \>0 Size of the data received, if successful.
 * 0, in case when the connection has been closed
 * In case of error, `SRT_ERROR` (-1)
 
@@ -603,7 +623,7 @@ You need to pass them to `srt_sendfile` or `srt_recvfile` function if you don't 
 value to chose.
 
 Returns:
-* >0 Size of the transmitted data of a file. It may be less than `size`, if the size
+* \>0 Size of the transmitted data of a file. It may be less than `size`, if the size
 was greater than the free space in the buffer, in which case you have to send rest of
 the file next time.
 * -1 in case of error
@@ -882,7 +902,7 @@ readiness array even if it's write ready, but it will be reported there, if the
 operation on this socket encountered an error.
 
 Return:
-* >0 number of ready sockets (of whatever kind), if any were ready
+* \>0 number of ready sockets (of whatever kind), if any were ready
 * -1 in case of error
 
 Errors:
@@ -899,7 +919,7 @@ int srt_epoll_release(int eid);
 Deletes the epoll container.
 
 Return:
-* >0 number of ready sockets (of whatever kind), if any were ready
+* \>0 number of ready sockets (of whatever kind), if any were ready
 * -1 in case of error
 
 Errors:
