@@ -21,6 +21,11 @@ SRT API Functions
 - [**Options and properties**](#Options-and-properties)
   * [srt_getpeername](#srt_getpeername)
   * [srt_getsockname](#srt_getsockname)
+  * [srt_getsockopt](#srt_getsockopt)
+  * [srt_getsockflag](#srt_getsockflag)
+  * [srt_setsockopt](#srt_setsockopt)
+  * [srt_setsockflag](#srt_setsockflag)
+
 
 <br><br>
 
@@ -373,40 +378,49 @@ Retrieves the remote address to which the socket is connected.
 int srt_getsockname(SRTSOCKET u, struct sockaddr* name, int* namelen);
 ```
 
-Extracts the address to which the socket was bound. Although you probably
-should know the address that you have used for binding yourself, this function
-can be useful to extract the local outgoing port number in case when it was
-specified as 0 with binding for system autoselection. With this function
-you can extract this port number after it has been autoselected.
+Extracts the address to which the socket was bound. Although you  should know 
+the address(es) that you have used for binding yourself, this function can be 
+useful for extracting the local outgoing port number when it was specified as 0 
+with binding for system autoselection. With this function you can extract the 
+port number after it has been autoselected.
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
-* `SRT_ENOCONN`: Socket `u` isn't bound, so there's no local
+- Errors:
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
+  * `SRT_ENOCONN`: Socket `u` isn't bound, so there's no local
 address to return (**BUG**? It should rather be `SRT_EUNBOUNDSOCK`)
 
+<br><br>
+
+#### srt_getsockopt
+#### srt_getsockflag
 ```
 int srt_getsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, void* optval, int* optlen);
 int srt_getsockflag(SRTSOCKET u, SRT_SOCKOPT opt, void* optval, int* optlen);
 ```
 
-Gets the value of the given socket option. The first version is to remind the BSD
-socket API convention, although the "level" parameter is ignored. The second version
-lacks this one ignored parameter.
+Gets the value of the given socket option. The first version (`srt_getsockopt`) 
+respects the BSD socket API convention, although the "level" parameter is ignored. 
+The second version (`srt_getsockflag`) omits the "level" parameter completely.
 
-Options come with various data types, you need to know what data type is assigned
-to particular option and pass a variable of appropriate data type to be filled in.
-Specifications you can find in the `apps/socketoptions.hpp` file at the `srt_options`
-object declaration.
+Options correspond to various data types, so you need to know what data type is 
+assigned to a particular option, and to pass a variable of the appropriate data 
+type. Specifications are provided in the `apps/socketoptions.hpp` file at the 
+`srt_options` object declaration.
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
-* `SRT_EINVOP`: Option `opt` designates no valid option
+- Errors:
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
+  * `SRT_EINVOP`: Option `opt` indicates no valid option
+
+<br><br>
+
+#### srt_setsockopt
+#### srt_setsockflag
 
 ```
 int srt_setsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, const void* optval, int optlen);
