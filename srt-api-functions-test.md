@@ -14,6 +14,8 @@ SRT API Functions
   * [srt_close](#srt_close)
 - [**Connecting**](#Connecting)
   * [srt_listen](#srt_listen)
+  * [srt_accept](#srt_accept)
+  * [srt_connect](#srt_connect)
 
 <br><br>
 
@@ -226,81 +228,90 @@ defines how many sockets may be allowed to wait until they are accepted
 
 - Errors:
   * `SRT_EINVPARAM`: Value of `backlog` is 0 or negative.
-  * `SRT_EINVSOCK`: Socket `u` indicates no valid SRT socket
-  * `SRT_EUNBOUNDSOCK`: `srt_bind` has not yet been called on that socket
-  * `SRT_ERDVNOSERV`: `SRTO_RENDEZVOUS` flag is set to true on specified socket
-  * `SRT_EINVOP`: Internal error (should not happen when reported `SRT_EUNBOUNDSOCK`)
-  * `SRT_ECONNSOCK`: The socket is already connected
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid SRT socket.
+  * `SRT_EUNBOUNDSOCK`: `srt_bind` has not yet been called on that socket.
+  * `SRT_ERDVNOSERV`: `SRTO_RENDEZVOUS` flag is set to true on specified socket.
+  * `SRT_EINVOP`: Internal error (should not happen when `SRT_EUNBOUNDSOCK` is reported).
+  * `SRT_ECONNSOCK`: The socket is already connected.
   * `SRT_EDUPLISTEN`: The address used in `srt_bind` by this socket is already
 occupied by another listening socket. Binding multiple sockets to one IP address 
 and port is allowed, as long as `SRTO_REUSEADDR` is set to true, but only one of 
-these socket can be set up as a listener)
+these sockets can be set up as a listener.
+
+<br><br>
+
+#### srt_accept
 
 ```
 SRTSOCKET srt_accept(SRTSOCKET lsn, struct sockaddr* addr, int* addrlen);
 ```
 
-Accepts a pending connection with creating a new socket that handles it. The
+Accepts a pending connection and creates a new socket to handle it. The
 socket that is connected to a remote party is returned.
 
 * `lsn`: the listener socket previously configured by `srt_listen`
 * `addr`: the IP address and port specification for the remote party
-* `addrlen`: INPUT: size of `addr` pointed object. OUTPUT: real size of the returned object
+* `addrlen`: INPUT: size of `addr` pointed object. OUTPUT: real size of the 
+returned object
 
-Note: `addr` is allowed to be NULL, in which case it's understood as that the
-application is not interested with the address from which the connection has come.
-Otherwise this should specify an object to be written the address to, and in this
-case `addrlen` must also specify a variable to write the object size to.
+**NOTE:** `addr` is allowed to be NULL, in which case it's understood that the
+application is not interested in the address from which the connection originated.
+Otherwise `addr` should specify an object into which the address will be written, 
+and `addrlen` must also specify a variable to contain the object size.
 
-Returns:
-* A valid socket ID for the connection, on success
-* On failure, `SRT_ERROR` (-1)
+- Returns:
+  * A valid socket ID for the connection, on success
+  * `SRT_ERROR` (-1) on failure 
 
-Errors:
-* `SRT_EINVPARAM`: NULL specified as `addrlen`, when `addr` is not NULL
-* `SRT_EINVSOCK`: `lsn` designates no valid socket ID. Can also mean Internal
-Error in case when an error occurred when creating an accepted socket (**BUG**?)
-* `SRT_ENOLISTEN`: `lsn` is not set up as a listener (`srt_listen` not called,
-or the listener socket has been closed in the meantime)
-* `SRT_ERDVNOSERV`: Internal error (if no `SRT_ENOLISTEN` reported, it means
+- Errors:
+  * `SRT_EINVPARAM`: NULL specified as `addrlen`, when `addr` is not NULL
+  * `SRT_EINVSOCK`: `lsn` designates no valid socket ID. Can also mean Internal
+Error when an error occurred while creating an accepted socket (**BUG**?)
+  * `SRT_ENOLISTEN`: `lsn` is not set up as a listener (`srt_listen` not called,
+or the listener socket has already been closed)
+  * `SRT_ERDVNOSERV`: Internal error (if no `SRT_ENOLISTEN` reported, it means
 that the socket could not be set up as rendezvous because `srt_listen` does
 not allow it)
-* `SRT_EASYNCRCV`: No connection reported so far. This error is reported only
-when the `lsn` listener socket was configured as nonblocking for reading
+  * `SRT_EASYNCRCV`: No connection reported so far. This error is reported only
+when the `lsn` listener socket was configured as non-blocking for reading
 (`SRTO_RCVSYN` set to false); otherwise the call blocks until a connection
-is reported or an error occurred
+is reported or an error occurs
 
+<br><br>
+
+#### srt_connect
 
 ```
 int srt_connect(SRTSOCKET u, const struct sockaddr* name, int namelen);
 ```
 
-This connects given socket to a remote party with specified address and port.
+This connects a socket to a remote party with a specified address and port.
 
-* `u`: SRT socket. This must be a socket freshly created and not yet used for anything
-except possibly `srt_bind`.
+* `u`: SRT socket. This must be a freshly created socket that has not yet been 
+used for anything except possibly `srt_bind`.
 * `name`: specification of the remote address and port
 * `namelen`: size of the object passed by `name`
 
-Notes:
-1. See *FUTURE* at `srt_bind` about family and `SRT_EINVPARAM` error.
-2. The socket used here may be bound from upside so that it used a predefined
+**NOTES:**
+1. See **NOTE** regarding family under [`srt_create_socket`](#srt_create_socket),.
+and `SRT_EINVPARAM` error under [`srt_bind`](#srt_bind) above.
+2. The socket used here may be bound from upside so that it uses a predefined
 network interface or local outgoing port. If not, it behaves as if it was
 bound to `INADDR_ANY` (which binds on all interfaces) and port 0 (which
 makes the system assign the port automatically).
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
-* `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
-* `SRT_ERDVUNBOUND`: Socket `u` has set `SRTO_RENDEZVOUS` to true, but `srt_bind`
+- Errors:
+  * `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
+  * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
+  * `SRT_ERDVUNBOUND`: Socket `u` has set `SRTO_RENDEZVOUS` to true, but `srt_bind`
 wasn't called on it yet. The `srt_connect` function is also used to connect a
 rendezvous socket, but rendezvous sockets must be explicitly bound to a local
 interface prior to connecting. Non-rendezvous sockets (caller sockets) can be
 left without binding - the call to `srt_connect` will bind them automatically.
-* `SRT_ECONNSOCK`: Socket `u` is already connected
+  * `SRT_ECONNSOCK`: Socket `u` is already connected
 
 
 ```
