@@ -21,10 +21,8 @@ SRT API Functions
 - [**Options and properties**](#Options-and-properties)
   * [srt_getpeername](#srt_getpeername)
   * [srt_getsockname](#srt_getsockname)
-  * [srt_getsockopt](#srt_getsockopt)
-  * [srt_getsockflag](#srt_getsockflag)
-  * [srt_setsockopt](#srt_setsockopt)
-  * [srt_setsockflag](#srt_setsockflag)
+  * [srt_getsockopt, getsockflag](#srt_getsockopt-getsockflag)
+  * [srt_setsockopt, srt_setsockflag](#srt_setsockopt-srt_setsockflag)
 
 
 <br><br>
@@ -394,8 +392,7 @@ address to return (**BUG**? It should rather be `SRT_EUNBOUNDSOCK`)
 
 <br><br>
 
-#### srt_getsockopt
-#### srt_getsockflag
+#### srt_getsockopt, srt_getsockflag
 ```
 int srt_getsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, void* optval, int* optlen);
 int srt_getsockflag(SRTSOCKET u, SRT_SOCKOPT opt, void* optval, int* optlen);
@@ -419,8 +416,7 @@ type. Specifications are provided in the `apps/socketoptions.hpp` file at the
 
 <br><br>
 
-#### srt_setsockopt
-#### srt_setsockflag
+#### srt_setsockopt, srt_setsockflag
 
 ```
 int srt_setsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, const void* optval, int optlen);
