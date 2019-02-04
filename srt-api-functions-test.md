@@ -16,6 +16,11 @@ SRT API Functions
   * [srt_listen](#srt_listen)
   * [srt_accept](#srt_accept)
   * [srt_connect](#srt_connect)
+  * [srt_connect_debug](#srt_connect_debug)
+  * [srt_rendezvous](#srt_rendezvous)
+- [Options and properties](#Options-and-properties)
+  * [srt_getpeername](#srt_getpeername)
+  * [srt_getsockname](srt_getsockname)
 
 <br><br>
 
@@ -285,7 +290,7 @@ is reported or an error occurs
 int srt_connect(SRTSOCKET u, const struct sockaddr* name, int namelen);
 ```
 
-This connects a socket to a remote party with a specified address and port.
+Connects a socket to a remote party with a specified address and port.
 
 * `u`: SRT socket. This must be a freshly created socket that has not yet been 
 used for anything except possibly `srt_bind`.
@@ -293,7 +298,7 @@ used for anything except possibly `srt_bind`.
 * `namelen`: size of the object passed by `name`
 
 **NOTES:**
-1. See **NOTE** regarding family under [`srt_create_socket`](#srt_create_socket),.
+1. See **NOTE** regarding family under [`srt_create_socket`](#srt_create_socket), 
 and `SRT_EINVPARAM` error under [`srt_bind`](#srt_bind) above.
 2. The socket used here may be bound from upside so that it uses a predefined
 network interface or local outgoing port. If not, it behaves as if it was
@@ -304,56 +309,66 @@ makes the system assign the port automatically).
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
-  * `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
   * `SRT_ERDVUNBOUND`: Socket `u` has set `SRTO_RENDEZVOUS` to true, but `srt_bind`
-wasn't called on it yet. The `srt_connect` function is also used to connect a
+hasn't yet been called on it. The `srt_connect` function is also used to connect a
 rendezvous socket, but rendezvous sockets must be explicitly bound to a local
 interface prior to connecting. Non-rendezvous sockets (caller sockets) can be
 left without binding - the call to `srt_connect` will bind them automatically.
   * `SRT_ECONNSOCK`: Socket `u` is already connected
 
+<br><br>
+
+#### srt_connect_debug
 
 ```
 int srt_connect_debug(SRTSOCKET u, const struct sockaddr* name, int namelen, int forced_isn);
 ```
 
-This function is for developers only and can be used for testing. It does the same as
-`srt_connect`, with the exception that it allows to specify the Initial Sequence Number
-for data transmission. Normally this value is random-generated.
+This function is for developers only and can be used for testing. It does the 
+same thing as [`srt_connect`](#srt_connect), with the exception that it allows 
+specifying the Initial Sequence Number for data transmission. Normally this value 
+is generated randomly.
 
+<br><br>
+
+#### srt_rendezvous
 ```
 int srt_rendezvous(SRTSOCKET u, const struct sockaddr* local_name, int local_namelen,
         const struct sockaddr* remote_name, int remote_namelen);
 ```
-
 Performs a rendezvous connection. This is a shortcut for doing bind locally,
-setting `SRTO_RENDEZVOUS` option to true, and doing `srt_connect`. 
+setting the `SRTO_RENDEZVOUS` option to true, and doing `srt_connect`. 
 
 * `u`: socket to connect
 * `local_name`: specifies the local network interface and port to bind
 * `remote_name`: specifies the remote party's IP address and port
 
-Note: The port value shall be the same in `local_name` and `remote_name`.
+**NOTE:** The port value shall be the same in `local_name` and `remote_name`.
 
+<br><br>
 
 Options and properties
 ----------------------
 
+#### srt_getpeername
 ```
 int srt_getpeername(SRTSOCKET u, struct sockaddr* name, int* namelen);
 ```
 
 Retrieves the remote address to which the socket is connected.
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
-* `SRT_ENOCONN`: Socket `u` isn't connected, so there's no remote
-address to return
+- Errors:
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
+  * `SRT_ENOCONN`: Socket `u` isn't connected, so there's no remote address to return
 
+<br><br>
+
+#### srt_getsockname
 ```
 int srt_getsockname(SRTSOCKET u, struct sockaddr* name, int* namelen);
 ```
