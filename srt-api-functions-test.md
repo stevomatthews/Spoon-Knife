@@ -10,6 +10,10 @@ SRT API Functions
   * [srt_create_socket](#srt_create_socket)
   * [srt_bind_peerof](#srt_bind-peerof)
   * [srt_getsockstate](#srt_getsockstate)
+  * [rt_getsndbuffer](#rt_getsndbuffer)
+  * [srt_close](#srt_close)
+- [**Connecting**](#Connecting)
+  * [srt_listen](#srt_listen)
 
 <br><br>
 
@@ -169,6 +173,10 @@ be completed before closing)
 thread
 * `SRTS_NONEXIST`: The specified number does not correspond to a valid socket.
 
+<br><br>
+
+#### rt_getsndbuffer
+
 ```
 int srt_getsndbuffer(SRTSOCKET sock, size_t* blocks, size_t* bytes);
 ```
@@ -176,12 +184,15 @@ int srt_getsndbuffer(SRTSOCKET sock, size_t* blocks, size_t* bytes);
 Retrieves information about the sender buffer.
 
 * `sock`: Socket to test
-* `blocks`: written information about buffer blocks in use
-* `bytes`: written information about bytes in use
+* `blocks`: Written information about buffer blocks in use
+* `bytes`: Written information about bytes in use
 
-This function can be used for diagnostics, especially useful when the socket
-needs to be closed asynchronously.
+This function can be used for diagnostics. It is especially useful when the 
+socket needs to be closed asynchronously.
 
+<br><br>
+
+#### srt_close
 
 ```
 int srt_close(SRTSOCKET u);
@@ -190,16 +201,21 @@ int srt_close(SRTSOCKET u);
 Closes the socket and frees all used resources. Note that underlying UDP sockets
 may be shared between sockets, so these are freed only with the last user closed.
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
+- Errors:
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
 
+<br><br>
 
 Connecting
 ----------
 
+
+<br><br>
+
+#### srt_listen
 ```
 int srt_listen(SRTSOCKET u, int backlog);
 ```
