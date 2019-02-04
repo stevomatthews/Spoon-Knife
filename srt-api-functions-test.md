@@ -1,7 +1,12 @@
 SRT API Functions
 =================
 
-
+* [**Library Initialization**](#Library-Initialization)
+  - [srt_startup](#srt_startup)
+  - [srt_cleanup](#srt_cleanup)
+* [**Creating and configuring sockets**](#Creating-and-configuring-sockets)
+  - [srt_socket](#srt_socket)
+  - [srt_bind](#srt_bind)
 
 Library initialization
 ----------------------
@@ -71,7 +76,7 @@ and the only reasonable value for the `type` parameter here is `SOCK_DGRAM`.
 **NOTE:** This is probably a design flaw (bug?). Usually underlying system errors are
 reported by `SRT_ECONNSETUP`.<br><br>
 
-### srt_bind( )
+### srt_bind
 ```
 int srt_bind(SRTSOCKET u, const struct sockaddr* name, int namelen);
 ```
