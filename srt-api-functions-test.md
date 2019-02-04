@@ -7,9 +7,11 @@ SRT API Functions
 - [**Creating and configuring sockets**](#Creating-and-configuring-sockets)
   * [srt_socket](#srt_socket)
   * [srt_bind](#srt_bind)
-  * [srt_create_socket](#srt-create-socket)
-  * [srt_bind_peerof](#srt-bind-peerof)
-  * [srt_getsockstate](#srt-getsockstate)
+  * [srt_create_socket](#srt_create_socket)
+  * [srt_bind_peerof](#srt_bind-peerof)
+  * [srt_getsockstate](#srt_getsockstate)
+
+<br><br>
 
 Library initialization
 ----------------------
@@ -52,6 +54,8 @@ exiting the application that uses the SRT library.
 This means that if you call `srt_startup` multiple times, you need to call the 
 `srt_cleanup` function exactly the same number of times.
 
+<br><br>
+
 Creating and configuring sockets
 -------------------------------
 
@@ -84,7 +88,7 @@ are reported by `SRT_ECONNSETUP`.
 
 <br><br>
 
-### srt_bind
+#### srt_bind
 ```
 int srt_bind(SRTSOCKET u, const struct sockaddr* name, int namelen);
 ```
