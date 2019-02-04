@@ -25,7 +25,7 @@ SRT API Functions
   * [srt_setsockopt, srt_setsockflag](#srt_setsockopt-srt_setsockflag)
 - [**Helper data types for transmission**](#Helper-data-types-for-transmission)
   * [SRT_MSGCTRL](#SRT_MSGCTRL)
-- [Transmission](#Transmission)
+- [**Transmission**](#Transmission)
   * [srt_send, srt_sendmsg, srt_sendmsg2](#srt_send-srt_sendmsg-srt_sendmsg2)
 
 
@@ -529,6 +529,16 @@ int srt_sendmsg2(SRTSOCKET u, const char* buf, int len, SRT_MSGCTRL *mctrl);
 
 Sends a payload to a remote party over a given socket.
 
+* `u`: Socket used to send. The socket must be connected for this operation.
+* `buf`: Points to the buffer containing the payload to send
+* `len`: Size of the payload specified in `buf`
+* `ttl`: Time (in `[ms]`) to wait for a possibility to send. See description of 
+the [`SRT_MSGCTRL::msgttl`](#SRT_MSGCTRL) field.
+* `inorder`: Required to be received in the order of sending. See 
+[`SRT_MSGCTRL::inorder`](#SRT_MSGCTRL).
+* `mctrl`: An object of [`SRT_MSGCTRL`](#SRT_MSGCTRL) type that contains extra 
+parameters, including `ttl` and `inorder`.
+
 The way this function works is determined by the mode set in options, and it has 
 specific requirements:
 
@@ -543,15 +553,6 @@ other words, a single call to this function determines a message's boundaries.
 3. In **live mode**, you are only allowed to send up to the length of
 `SRTO_PAYLOADSIZE`, which can't be larger than 1456 bytes (1316 default).
 
-* `u`: Socket used to send. The socket must be connected for this operation.
-* `buf`: Points to the buffer containing the payload to send
-* `len`: Size of the payload specified in `buf`
-* `ttl`: Time (in `[ms]`) to wait for a possibility to send. See description at
-`SRT_MSGCTRL::msgttl` field.
-* `inorder`: Required to be received in the order of sending. See `SRT_MSGCTRL::inorder`.
-* `mctrl`: An object of `SRT_MSGCTRL` type that contains extra parameters, including
-`ttl` and `inorder`.
-
 Returns:
 * Size of the data sent, if successful. Note that in file/stream mode the
 returned size may be less than `len`, which means that it didn't send the
@@ -562,7 +563,7 @@ file/message and live mode the successful return is always equal to `len`
 
 Errors:
 
-* `SRT_ENOCONN`: Socket `u` used for the operation is not connected
+* `SRT_ENOCONN`: Socket `u` used when the operation is not connected
 * `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
 * `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
 	* Live mode: trying to send at once more bytes than `SRTO_PAYLOADSIZE`
