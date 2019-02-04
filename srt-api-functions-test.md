@@ -24,7 +24,9 @@ SRT API Functions
   * [srt_getsockopt, srt_getsockflag](#srt_getsockopt-srt_getsockflag)
   * [srt_setsockopt, srt_setsockflag](#srt_setsockopt-srt_setsockflag)
 - [**Helper data types for transmission**](#Helper-data-types-for-transmission)
-  * [SRT_MsgCtrl](#SRT_MsgCtrl)
+  * [SRT_MSGCTRL](#SRT_MSGCTRL)
+- [Transmission](#Transmission)
+  * [srt_send, srt_sendmsg, srt_sendmsg2](#srt_send-srt_sendmsg-srt_sendmsg2)
 
 
 <br><br>
@@ -447,7 +449,7 @@ type with the option value to be set.
 Helper data types for transmission
 ----------------------------------
 
-#### SRT_MsgCtrl
+#### SRT_MSGCTRL
 
 The `SRT_MSGCTRL` structure:
 
@@ -464,43 +466,43 @@ typedef struct SRT_MsgCtrl_
 } SRT_MSGCTRL;
 ```
 
-The `SRT_MSGCTRL` structure is used in `srt_sendmsg2` and `srt_recvmsg2` calls and it
-specifies some special extra parameters:
+The `SRT_MSGCTRL` structure is used in `srt_sendmsg2` and `srt_recvmsg2` calls 
+and specifies some special extra parameters:
 
-* `flags`: [IN, OUT]. Nothing so far, reserved for future, should be 0. This is
+* `flags`: [IN, OUT]. RESERVED FOR FUTURE USE (should be 0). This is
 intended to specify some special options controlling the details of how the
-called function should work
-* `msgttl`: [IN]. Message and Live mode only. The TTL for the message sending,
-in `[ms]` (for receiving, unused). The packet is scheduled for sending by this
-call and then waits in the sender buffer to be picked up at the moment when all
-previously scheduled data are already sent, which may be blocked when the data
-are scheduled faster than the network can afford to send. Default -1 means to
-wait indefinitely. If specified, then the packet waits for an opportunity for
-being sent over the network only up to this time, and then if still not sent,
-it's discarded.
-* `inorder`: [IN]. Message mode only. Used only for sending. If set, the
-message should be extracted by the receiver in the order of sending. This can
-be meaningful if a packet loss has happened so particular message must wait for
-retransmission so that it can be reassembled and then delivered. When this flag
-is false, this message can be delivered even if there are any previous message
-still waiting for completion.
-* `boundary`: Currently unused, reserved for future. Predicted to be used in
-a special mode when you are allowed to send or retrieve a part of the message.
+called function should work.
+* `msgttl`: [IN]. In Message and Live mode only, specifies the TTL for sending 
+messages (in `[ms]`). Not used for receiving messages. A packet is scheduled 
+for sending by this call and then waits in the sender buffer to be picked up at 
+the moment when all previously scheduled data are already sent, which may be 
+blocked when the data are scheduled faster than the network can afford to send. 
+Default -1 means to wait indefinitely. If specified, then the packet waits for 
+an opportunity to be sent over the network only up to this TTL, and then, if 
+still not sent, the packet is discarded.
+* `inorder`: [IN]. In Message mode only, specifies that sent messages should be 
+extracted by the receiver in the order of sending. This can be meaningful if a 
+packet loss has happened, and a particular message must wait for retransmission 
+so that it can be reassembled and then delivered. When this flag is false, the 
+message can be delivered even if there are any previous messages still waiting 
+for completion.
+* `boundary`: RESERVED FOR FUTURE USE. Intended to be used in a special mode 
+when you are allowed to send or retrieve a part of the message.
 * `srctime`:
    * [IN] Sender only. Specifies the application-provided timestamp. If not used
-(specified as 0), the current system time (absolute microseconds since epoch) is used.
+(specified as 0), the current system time (absolute microseconds since epoch) is 
+used.
    * [OUT] Receiver only. Specifies the time when the packet was intended to be
 delivered to the receiver.
 * `pktseq`: Receiver only. Reports the sequence number for the packet carrying
 out the payload being returned. If the payload is carried out by more than one
-UDP packet, the reported is only the sequence of the first one. Note that in
-live mode there's always one UDP packet per message.
-* `msgno`: Message number. It's allowed to be sent in both sender and receiver,
-although it is required that this value remain monotonic in subsequent calls
-to sending. Normally message numbers start with 1 and increase with every
-message sent.
+UDP packet, only the sequence of the first one is reported. Note that in
+Live mode there's always one UDP packet per message.
+* `msgno`: Message number that can be sent by both sender and receiver,
+although it is required that this value remain monotonic in subsequent send calls. 
+Normally message numbers start with 1 and increase with every message sent.
 
-Helpers for `SRT_MSGCTRL`:
+**Helpers for `SRT_MSGCTRL`:**
 
 ```
 void srt_msgctrl_init(SRT_MSGCTRL* mctrl);
@@ -508,14 +510,16 @@ const SRT_MSGCTRL srt_msgctrl_default;
 ```
 
 Helpers for getting an object of `SRT_MSGCTRL` type ready to use. The first is
-a function and it fills the object with default values. The second is a constant
-object and can be used as a source for assignment. Note that you cannot pass this
-constant object into any API function because they require it to be mutable, as
-they use some field to output values.
+a function that fills the object with default values. The second is a constant
+object and can be used as a source for assignment. Note that you cannot pass 
+this constant object into any of the API functions because they require it to be 
+mutable, as they use some fields to output values.
 
+<br><br>
 
 Transmission
 ------------
+#### srt_send, srt_sendmsg, srt_sendmsg2
 
 ```
 int srt_send(SRTSOCKET u, const char* buf, int len);
@@ -523,20 +527,20 @@ int srt_sendmsg(SRTSOCKET u, const char* buf, int len, int ttl/* = -1*/, int ino
 int srt_sendmsg2(SRTSOCKET u, const char* buf, int len, SRT_MSGCTRL *mctrl);
 ```
 
-Sends a payload to the remote party over a given socket.
+Sends a payload to a remote party over a given socket.
 
-Note that the way how this function works is determined by the mode set in
-options and it is holding specific requirements:
+The way this function works is determined by the mode set in options, and it has 
+specific requirements:
 
-1. In file/stream mode, the payload is byte-based. You are not required to
-mind the size of the data, although they are only guaranteed to be received
-in the same order of bytes.
+1. In **file/stream mode**, the payload is byte-based. You are not required to
+know the size of the data, although they are only guaranteed to be received
+in the same byte order.
 
-2. In file/message mode, the payload that you send using this function is
+2. In **file/message mode**, the payload that you send using this function is
 exactly a single message that you intend to be received as a whole. In
-other words, a single call to this function determines message's boundaries.
+other words, a single call to this function determines a message's boundaries.
 
-3. In live mode, you are only allowed to send up to the length of
+3. In **live mode**, you are only allowed to send up to the length of
 `SRTO_PAYLOADSIZE`, which can't be larger than 1456 bytes (1316 default).
 
 * `u`: Socket used to send. The socket must be connected for this operation.
