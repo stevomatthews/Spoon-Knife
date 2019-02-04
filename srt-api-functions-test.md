@@ -212,32 +212,29 @@ may be shared between sockets, so these are freed only with the last user closed
 Connecting
 ----------
 
-
-<br><br>
-
 #### srt_listen
 ```
 int srt_listen(SRTSOCKET u, int backlog);
 ```
 
-This sets up the listening state on a socket with setting the backlog, which defines
-how many sockets may be allowed to wait until they are accepted (excessive connection
-requests are rejected in advance).
+This sets up the listening state on a socket with a backlog setting that 
+defines how many sockets may be allowed to wait until they are accepted 
+(excessive connection requests are rejected in advance).
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0.
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0.
 
-Errors:
-* `SRT_EINVPARAM`: Value of `backlog` is 0 or negative.
-* `SRT_EINVSOCK`: Socket `u` designates no valid SRT socket
-* `SRT_EUNBOUNDSOCK`: `srt_bind` wasn't called on that socket yet
-* `SRT_ERDVNOSERV`: `SRTO_RENDEZVOUS` flag is set to true on given socket
-* `SRT_EINVOP`: Internal error (should not happen when reported `SRT_EUNBOUNDSOCK`)
-* `SRT_ECONNSOCK`: The socket is already connected
-* `SRT_EDUPLISTEN`: Address used in `srt_bind` in this socket is already
-occupied by another listening socket (It is allowed to bind multiple sockets to
-one IP address and port, as long as `SRTO_REUSEADDR` is set to true, but only
-one of these socket can be set up as a listener)
+- Errors:
+  * `SRT_EINVPARAM`: Value of `backlog` is 0 or negative.
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid SRT socket
+  * `SRT_EUNBOUNDSOCK`: `srt_bind` has not yet been called on that socket
+  * `SRT_ERDVNOSERV`: `SRTO_RENDEZVOUS` flag is set to true on specified socket
+  * `SRT_EINVOP`: Internal error (should not happen when reported `SRT_EUNBOUNDSOCK`)
+  * `SRT_ECONNSOCK`: The socket is already connected
+  * `SRT_EDUPLISTEN`: The address used in `srt_bind` by this socket is already
+occupied by another listening socket. Binding multiple sockets to one IP address 
+and port is allowed, as long as `SRTO_REUSEADDR` is set to true, but only one of 
+these socket can be set up as a listener)
 
 ```
 SRTSOCKET srt_accept(SRTSOCKET lsn, struct sockaddr* addr, int* addrlen);
