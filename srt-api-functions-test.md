@@ -21,8 +21,10 @@ SRT API Functions
 - [**Options and properties**](#Options-and-properties)
   * [srt_getpeername](#srt_getpeername)
   * [srt_getsockname](#srt_getsockname)
-  * [srt_getsockopt, getsockflag](#srt_getsockopt-getsockflag)
+  * [srt_getsockopt, srt_getsockflag](#srt_getsockopt-srt_getsockflag)
   * [srt_setsockopt, srt_setsockflag](#srt_setsockopt-srt_setsockflag)
+- [**Helper data types for transmission**](#Helper-data-types-for-transmission)
+  * [SRT_MsgCtrl](#SRT_MsgCtrl)
 
 
 <br><br>
@@ -423,27 +425,29 @@ int srt_setsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, const vo
 int srt_setsockflag(SRTSOCKET u, SRT_SOCKOPT opt, const void* optval, int optlen);
 ```
 
-Sets the option to a socket. The first version is to remind the BSD socket API
-convention, although the "level" parameter is ignored. The second version lacks
-this one ignored parameter.
+Sets a value for a socket option. The first version (`srt_setsockopt`) respects 
+the BSD socket API convention, although the "level" parameter is ignored. 
+The second version (`srt_setsockflag`) omits the "level" parameter completely.
 
-Options come with various data types, you need to know what data type is assigned
-to particular option and pass a variable of appropriate data type with the option
-value to be set.
+Options correspond to various data types, so you need to know what data type is 
+assigned to a particular option, and to pass a variable of the appropriate data 
+type with the option value to be set.
 
-Returns:
-* `SRT_ERROR` (-1) in case of error, otherwise 0
+- Returns:
+  * `SRT_ERROR` (-1) in case of error, otherwise 0
 
-Errors:
-* `SRT_EINVSOCK`: Socket `u` designates no valid socket ID
-* `SRT_EINVOP`: Option `opt` designates no valid option
-* Various other errors that may result of problems when setting a specific option
-(see option description for details).
-
+-Errors:
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
+  * `SRT_EINVOP`: Option `opt` indicates no valid option
+  * Various other errors that may result from problems when setting a specific 
+  option (see option description for details).
+  
+<br><br>
 
 Helper data types for transmission
 ----------------------------------
 
+#### SRT_MsgCtrl
 
 The `SRT_MSGCTRL` structure:
 
