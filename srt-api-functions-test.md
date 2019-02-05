@@ -27,6 +27,9 @@ SRT API Functions
   * [SRT_MSGCTRL](#SRT_MSGCTRL)
 - [**Transmission**](#Transmission)
   * [srt_send, srt_sendmsg, srt_sendmsg2](#srt_send-srt_sendmsg-srt_sendmsg2)
+  * [srt_recv, srt_recvmsg, srt_recvmsg2](#srt_recv-srt_recvmsg-srt_recvmsg2)
+
+  
 
 
 <br><br>
@@ -569,7 +572,7 @@ file/message and live mode the successful return is always equal to `len`
     * Live mode: trying to send more bytes at once than `SRTO_PAYLOADSIZE`
   * `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
     * Currently not in use. File congestion control used for stream mode does 
-    not restrict the parameters.
+    not restrict the parameters.**???**
   * `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
 it exceeds the current total space in the sending buffer in bytes). This means
 that the sender buffer is too small, or the application is trying to send
@@ -581,13 +584,15 @@ the sending buffer becomes available.
   * `SRT_ETIMEOUT`: The condition described above still persists and the timeout
 has passed. This is only reported in blocking mode when `SRTO_SNDTIMEO` is
 set to a value other than -1.
-  * `SRT_EPEERERR`: This is reported only in case where, as a stream is being 
+  * `SRT_EPEERERR`: This is reported only in the case where, as a stream is being 
   received by a peer, the `srt_recvfile` function encounters an error during a 
-  write operation on a file encountered an error. This is reported by a 
-  `UMSG_PEERERROR` from the peer, and the agent sets the appropriate flag 
-  internally. This flag persists up to the moment when the connection is 
-  broken or closed.
+  write operation on a file. This is reported by a `UMSG_PEERERROR` message from 
+  the peer, and the agent sets the appropriate flag internally. This flag 
+  persists up to the moment when the connection is broken or closed.
 
+<br><br>
+
+#### srt_recv, srt_recvmsg, srt_recvmsg2
 
 ```
 int srt_recv(SRTSOCKET u, char* buf, int len);
@@ -595,66 +600,68 @@ int srt_recvmsg(SRTSOCKET u, char* buf, int len);
 int srt_recvmsg2(SRTSOCKET u, char *buf, int len, SRT_MSGCTRL *mctrl);
 ```
 
-Extract the payload waiting for receving. Note that `srt_recv` and `srt_recvmsg`
-are the same function, the name is left for historical reasons.
+Extracts the payload waiting to be received. Note that `srt_recv` and `srt_recvmsg`
+are identical functions, with `srt_recv` being kept for historical reasons.
 
 * `u`: Socket used to send. The socket must be connected for this operation.
 * `buf`: Points to the buffer to which the payload is copied
 * `len`: Size of the payload specified in `buf`
-* `mctrl`: An object of `SRT_MSGCTRL` type that contains extra parameters
+* `mctrl`: An object of [`SRT_MSGCTRL`](#SRT_MSGCTRL) type that contains extra 
+parameters
 
 The way this function works is determined by the mode set in options, and it has 
 specific requirements:
 
-1. In **file/stream mode**, retrieved are as many bytes as possible, that is minimum
-of the size of the given buffer and size of the data currently available. Data
-available, but not extracted this time will be available next time.
-2. In **file/message mode**, retrieved is exactly one message, with the boundaries
+1. In **file/stream mode**, as many bytes as possible are retrieved (the minimum
+being the size of the given buffer or the size of the data currently available). 
+Any data that is available but not extracted this time will be available next time.
+2. In **file/message mode**, exactly one message is retrieved, with the boundaries
 defined at the moment of sending. If some parts of the messages are already
 retrieved, but not the whole message, nothing will be received (the function
 blocks or returns `SRT_EASYNCRCV`). If the message to be returned does not
 fit in the buffer, nothing will be received and the error is reported.
-3. In **live mode**, like in file/message mode, although at most the size of
-`SRTO_PAYLOADSIZE` bytes will be retrieved. In this mode, however, with
-default settings of `SRTO_TSBPDMODE` and `SRTO_TLPKTDROP`, the message
-will be received only when its time to play has come, and until then it
-will be kept in the receiver buffer; also when the time to play has come
+3. In **live mode**, the function behaves as in file/message mode, although the 
+number of bytes retrieved will be at most the size of `SRTO_PAYLOADSIZE`. In this 
+mode, however, with default settings of `SRTO_TSBPDMODE` and `SRTO_TLPKTDROP`, 
+the message will be received only when its time to play has come, and until then 
+it will be kept in the receiver buffer; also, when the time to play has come
 for a message that is next to the currently lost one, it will be delivered
 and the lost one dropped.
 
-Returns:
-* \>0 Size of the data received, if successful.
-* 0, in case when the connection has been closed
-* In case of error, `SRT_ERROR` (-1)
+- Returns:
 
-Errors:
+  * \>0 size of the data received, if successful.
+  * 0, if when the connection has been closed
+  * `SRT_ERROR` (-1) when an error occurs 
 
-* `SRT_ENOCONN`: Socket `u` used for the operation is not connected
-* `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
+- Errors:
+
+  * `SRT_ENOCONN`: Socket `u` used for the operation is not connected.
+  * `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
 (this is reported only if the connection was unexpectedly broken, not
 when it was closed by the foreign host).
-* `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
-	* Live mode: size of the buffer is less than `SRTO_PAYLOADSIZE`
-* `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
-	* Currently not in use. The FileSmoother used as the only for stream
-	  mode does not restrict the parameters.
-* `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
-it exceeds the current total space in the sending buffer in bytes). It means
+  * `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
+    * Live mode: size of the buffer is less than `SRTO_PAYLOADSIZE`
+  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
+    * Currently not in use. File congestion control used for stream mode 
+     does not restrict the parameters. **???**
+  * `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
+it exceeds the current total space in the sending buffer in bytes). This means
 that the sender buffer is too small, or the application is trying to send
-larger message than initially predicted.
-* `SRT_EASYNCRCV`: There are no data currently waiting for delivery. This
-happens only in non-blocking mode (when `SRTO_RCVSYN` is set to false), in
+a larger message than initially intended.
+  * `SRT_EASYNCRCV`: There are no data currently waiting for delivery. This
+happens only in non-blocking mode (when `SRTO_RCVSYN` is set to false). In
 blocking mode the call is blocked until the data are ready. How this is defined,
 depends on the mode:
-   * In Live mode (with `SRTO_TSBPDMODE` on), it is expected to have at least
-     one whole packet ready, for which the playing time has come
-   * In File/Message mode, it is expected to have one full message available,
-      * Next waiting one if there are no messages with `inorder` = false
-      * Also possibly the first ready message with `inorder` = false
-   * In File/Stream mode, it is expected to have at least one byte of data
-     still not extracted
-* `SRT_ETIMEOUT`: The readiness condition like above is still not achieved and
-the timeout has passed. This is only reported in blocking mode with
+   * In **live mode** (with `SRTO_TSBPDMODE` on), at least one whole packet (for 
+   which the playing time has come) must be ready
+   * In **file/message mode**, one full message must be available,
+     * the next one waiting if there are no messages with `inorder` = false, or 
+     possibly the first message ready with `inorder` = false
+   * In **file/stream mode**, it is expected to have at least one byte of data 
+   still not extracted
+* `SRT_ETIMEOUT`: The readiness condition described above is still not achieved 
+and the timeout has passed. This is only reported in blocking mode when
 `SRTO_RCVTIMEO` is set to a value other than -1.
 
 
