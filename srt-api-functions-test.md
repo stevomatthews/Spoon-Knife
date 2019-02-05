@@ -530,8 +530,8 @@ int srt_sendmsg2(SRTSOCKET u, const char* buf, int len, SRT_MSGCTRL *mctrl);
 Sends a payload to a remote party over a given socket.
 
 * `u`: Socket used to send. The socket must be connected for this operation.
-* `buf`: Points to the buffer containing the payload to send
-* `len`: Size of the payload specified in `buf`
+* `buf`: Points to the buffer containing the payload to send.
+* `len`: Size of the payload specified in `buf`.
 * `ttl`: Time (in `[ms]`) to wait for a possibility to send. See description of 
 the [`SRT_MSGCTRL::msgttl`](#SRT_MSGCTRL) field.
 * `inorder`: Required to be received in the order of sending. See 
@@ -546,46 +546,47 @@ specific requirements:
 know the size of the data, although they are only guaranteed to be received
 in the same byte order.
 
-2. In **file/message mode**, the payload that you send using this function is
-exactly a single message that you intend to be received as a whole. In
-other words, a single call to this function determines a message's boundaries.
+2. In **file/message mode**, the payload that you send using this function is 
+a single message that you intend to be received as a whole. In other words, a 
+single call to this function determines a message's boundaries.
 
 3. In **live mode**, you are only allowed to send up to the length of
 `SRTO_PAYLOADSIZE`, which can't be larger than 1456 bytes (1316 default).
 
-Returns:
-* Size of the data sent, if successful. Note that in file/stream mode the
+- Returns:
+  * Size of the data sent, if successful. Note that in file/stream mode the
 returned size may be less than `len`, which means that it didn't send the
 whole contents of the buffer. You would need to call this function again
 with the rest of the buffer next time to send it completely. In both
 file/message and live mode the successful return is always equal to `len`
-* In case of error, `SRT_ERROR` (-1)
+  * In case of error, `SRT_ERROR` (-1)
 
-Errors:
+- Errors:
 
-* `SRT_ENOCONN`: Socket `u` used when the operation is not connected
-* `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
-* `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
-	* Live mode: trying to send at once more bytes than `SRTO_PAYLOADSIZE`
-* `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
-	* Currently not in use. The FileSmoother used as the only for stream
-	  mode does not restrict the parameters.
-* `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
-it exceeds the current total space in the sending buffer in bytes). It means
+  * `SRT_ENOCONN`: Socket `u` used when the operation is not connected.
+  * `SRT_ECONNLOST`: Socket `u` used for the operation has lost its connection.
+  * `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
+    * Live mode: trying to send more bytes at once than `SRTO_PAYLOADSIZE`
+  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
+    * Currently not in use. File congestion control used for stream mode does 
+    not restrict the parameters.
+  * `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
+it exceeds the current total space in the sending buffer in bytes). This means
 that the sender buffer is too small, or the application is trying to send
-larger message than initially predicted.
-* `SRT_EASYNCSND`: There's no free space currently in the buffer to schedule
+larger messages than initially intended.
+  * `SRT_EASYNCSND`: There's no free space currently in the buffer to schedule
 the payload. This is only reported in non-blocking mode (`SRTO_SNDSYN` set
-to false); in blocking mode the call is blocked until the free space in
-the sending buffer suffices.
-* `SRT_ETIMEOUT`: The condition like above still persists and the timeout
-has passed. This is only reported in blocking mode with `SRTO_SNDTIMEO` is
+to false); in blocking mode the call is blocked until enough free space in
+the sending buffer becomes available.
+  * `SRT_ETIMEOUT`: The condition described above still persists and the timeout
+has passed. This is only reported in blocking mode when `SRTO_SNDTIMEO` is
 set to a value other than -1.
-* `SRT_EPEERERR`: This is reported only in case of sending a stream that is
-being received by the peer by `srt_recvfile` function and the writing operation
-on the file encountered an error; this is reported by the peer by `UMSG_PEERERROR`
-message and the agent sets appropriate flag internally. This flag persists
-up to the moment when the connection is broken or closed.
+  * `SRT_EPEERERR`: This is reported only in case where, as a stream is being 
+  received by a peer, the `srt_recvfile` function encounters an error during a 
+  write operation on a file encountered an error. This is reported by a 
+  `UMSG_PEERERROR` from the peer, and the agent sets the appropriate flag 
+  internally. This flag persists up to the moment when the connection is 
+  broken or closed.
 
 
 ```
@@ -602,17 +603,18 @@ are the same function, the name is left for historical reasons.
 * `len`: Size of the payload specified in `buf`
 * `mctrl`: An object of `SRT_MSGCTRL` type that contains extra parameters
 
-There are some differences as to how this function works in particular modes:
+The way this function works is determined by the mode set in options, and it has 
+specific requirements:
 
-1. file/stream mode: Retrieved are as many bytes as possible, that is minimum
+1. In **file/stream mode**, retrieved are as many bytes as possible, that is minimum
 of the size of the given buffer and size of the data currently available. Data
 available, but not extracted this time will be available next time.
-2. file/message mode: Retrieved is exactly one message, with the boundaries
+2. In **file/message mode**, retrieved is exactly one message, with the boundaries
 defined at the moment of sending. If some parts of the messages are already
 retrieved, but not the whole message, nothing will be received (the function
 blocks or returns `SRT_EASYNCRCV`). If the message to be returned does not
 fit in the buffer, nothing will be received and the error is reported.
-3. live mode: Like in file/message mode, although at most the size of
+3. In **live mode**, like in file/message mode, although at most the size of
 `SRTO_PAYLOADSIZE` bytes will be retrieved. In this mode, however, with
 default settings of `SRTO_TSBPDMODE` and `SRTO_TLPKTDROP`, the message
 will be received only when its time to play has come, and until then it
