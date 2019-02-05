@@ -28,9 +28,14 @@ SRT API Functions
 - [**Transmission**](#Transmission)
   * [srt_send, srt_sendmsg, srt_sendmsg2](#srt_send-srt_sendmsg-srt_sendmsg2)
   * [srt_recv, srt_recvmsg, srt_recvmsg2](#srt_recv-srt_recvmsg-srt_recvmsg2)
-  * [int64_t srt_sendfile, int64_t srt_recvfile](#int64_t srt_sendfile-int64_t srt_recvfile)
+  * [srt_sendfile, srt_recvfile](#srt_sendfile-srt_recvfile)
 - [**Diagnostics**](#Diagnostics)
-  *  [srt_getlasterror_str](#srt_getlasterror_str)
+  * [srt_getlasterror_str](#srt_getlasterror_str)
+  * [srt_getlasterror](#srt_getlasterror)
+  * [srt_strerror](#srt_strerror)
+  * [srt_clearlasterror](#srt_clearlasterror)
+- [Performance tracking](#Performance-tracking)
+  * [srt_bstats, srt_bistats](#srt_bstats-srt_bistats)]
 
   
 
@@ -669,7 +674,7 @@ and the timeout has passed. This is only reported in blocking mode when
 
 <br><br>
 
-#### int64_t srt_sendfile, int64_t srt_recvfile
+#### srt_sendfile, srt_recvfile
 
 ```
 int64_t srt_sendfile(SRTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
@@ -720,10 +725,11 @@ don't know what value to chose.
   * `SRT_ERDPERM`: The read from file operation has failed (`srt_sendfile`).
   * `SRT_EWRPERM`: The write to file operation has failed (`srt_recvfile`).
 
+<br><br>
 
 Diagnostics
 -----------
-#### const char* srt_getlasterror_str
+#### srt_getlasterror_str
 
 ```
 const char* srt_getlasterror_str(void);
@@ -731,26 +737,35 @@ const char* srt_getlasterror_str(void);
 
 Get the text message for the last error.
 
+<br><br>
+
+#### srt_getlasterror
 
 ```
 int srt_getlasterror(int* errno_loc);
 ```
 
-Get the numeric code of the error. Additionally, in `errno_loc` there's returned any
-value of POSIX `errno` value that was associated with this error (0 if there was no
-system error), in case of Windows it's the value returned by `GetLastError()`.
+Get the numeric code of the error. Additionally, `errno_loc` returns any POSIX 
+`errno` value that was associated with this error (0 if there was no
+system error). For Windows, this is the value returned by `GetLastError()`.
 
+<br><br>
+
+#### srt_strerror
 ```
 const char* srt_strerror(int code, int errnoval);
 ```
 
-Returns a string message that represents given SRT error code and possibly `errno`
-value, if not 0.
+Returns a string message that represents a given SRT error code and possibly the 
+`errno` value, if not 0.
 
-*REMARK: This function isn't thread safe, it uses a static variable to hold the error
-description. There's no problem of using it in a multithreaded environment, just no
-other thread but one in the whole application may call this function.*
+**NOTE:** *This function isn't thread safe. It uses a static variable to hold the 
+error description. There's no problem with using it in a multithreaded environment, 
+as long as only one thread in the whole application calls this function.* **???**
 
+<br><br>
+
+#### srt_clearlasterror
 
 ```
 void srt_clearlasterror(void);
@@ -759,9 +774,11 @@ void srt_clearlasterror(void);
 This function clears the last error. After this call, the `srt_getlasterror` will
 report a "successful" code.
 
+<br><br>
+
 Performance tracking
 --------------------
-
+#### srt_bstats, srt_bistats
 ```
 // perfmon with Byte counters for better bitrate estimation.
 int srt_bstats(SRTSOCKET u, SRT_TRACEBSTATS * perf, int clear);
