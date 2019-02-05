@@ -28,6 +28,9 @@ SRT API Functions
 - [**Transmission**](#Transmission)
   * [srt_send, srt_sendmsg, srt_sendmsg2](#srt_send-srt_sendmsg-srt_sendmsg2)
   * [srt_recv, srt_recvmsg, srt_recvmsg2](#srt_recv-srt_recvmsg-srt_recvmsg2)
+  * [int64_t srt_sendfile, int64_t srt_recvfile](#int64_t srt_sendfile-int64_t srt_recvfile)
+- [**Diagnostics**](#Diagnostics)
+  *  [srt_getlasterror_str](#srt_getlasterror_str)
 
   
 
@@ -601,7 +604,7 @@ int srt_recvmsg2(SRTSOCKET u, char *buf, int len, SRT_MSGCTRL *mctrl);
 ```
 
 Extracts the payload waiting to be received. Note that `srt_recv` and `srt_recvmsg`
-are identical functions, with `srt_recv` being kept for historical reasons.
+are identical functions, with `srt_recv` **???** being kept for historical reasons.
 
 * `u`: Socket used to send. The socket must be connected for this operation.
 * `buf`: Points to the buffer to which the payload is copied
@@ -630,8 +633,8 @@ and the lost one dropped.
 
 - Returns:
 
-  * \>0 size of the data received, if successful.
-  * 0, if when the connection has been closed
+  * Size (\>0) of the data received, if successful.
+  * 0, if the connection has been closed
   * `SRT_ERROR` (-1) when an error occurs 
 
 - Errors:
@@ -664,18 +667,21 @@ depends on the mode:
 and the timeout has passed. This is only reported in blocking mode when
 `SRTO_RCVTIMEO` is set to a value other than -1.
 
+<br><br>
+
+#### int64_t srt_sendfile, int64_t srt_recvfile
 
 ```
 int64_t srt_sendfile(SRTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
 int64_t srt_recvfile(SRTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
 ```
 
-These are functions dedicated to sending and receiving a file. You need to call this function
-just once for the whole file, although you need to know the size of the file prior to sending
-and also define the size of a single block that should be internally retrieved and written
-into a file in a single step. This influences only the performance of the internal operations;
-from the application perspective you just have one call that exits only when the transmission
-is complete.
+These are functions dedicated to sending and receiving a file. You need to call 
+this function just once for the whole file, although you need to know the size of 
+the file prior to sending and also define the size of a single block that  should 
+be internally retrieved and written into a file in a single step. This influences 
+only the performance of the internal operations; from the application perspective 
+you just have one call that exits only when the transmission is complete.
 
 * `u`: Socket used for transmission. The socket must be connected.
 * `path`: Path to the file that should be read or written.
@@ -683,38 +689,41 @@ is complete.
 * `size`: Size of transfer (file size, if offset is at 0)
 * `block`: Size of the single block to read at once before writing it to a file
 
-There are values recommended for `block` parameter:
+The following values are recommended for the `block` parameter:
 
 ```
 #define SRT_DEFAULT_SENDFILE_BLOCK 364000
 #define SRT_DEFAULT_RECVFILE_BLOCK 7280000
 ```
 
-You need to pass them to `srt_sendfile` or `srt_recvfile` function if you don't know what
-value to chose.
+You need to pass them to the `srt_sendfile` or `srt_recvfile` function if you 
+don't know what value to chose.
 
-Returns:
-* \>0 Size of the transmitted data of a file. It may be less than `size`, if the size
-was greater than the free space in the buffer, in which case you have to send rest of
-the file next time.
-* -1 in case of error
+- Returns:
+  * Size (\>0) of the transmitted data of a file. It may be less than `size`, if 
+  the size was greater than the free space in the buffer, in which case you have 
+  to send rest of the file next time.
+  * -1 in case of error.
 
-Errors:
+- Errors:
 
-* `SRT_ENOCONN`: Socket `u` used for the operation is not connected
-* `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
-* `SRT_EINVALBUFFERAPI`: When socket has `SRTO_MESSAGEAPI` = true or `SRTO_TSBPDMODE` = true
+  * `SRT_ENOCONN`: Socket `u` used for the operation is not connected.
+  * `SRT_ECONNLOST`: Socket `u` used for the operation has lost its connection.
+  * `SRT_EINVALBUFFERAPI`: When socket has `SRTO_MESSAGEAPI` = true or 
+  `SRTO_TSBPDMODE` = true.
 (**BUG**: Looxlike MESSAGEAPI isn't checked)
-* `SRT_EINVRDOFF`: There is a mistake in `offset` or `size` parameters, which should match
-the index availability and size of the bytes available since `offset` index. This is actually
-reported for `srt_sendfile` when the `seekg` or `tellg` operations resulted in error
-* `SRT_EINVWROFF`: Like above, reported for `srt_recvfile` and `seekp`/`tellp`.
-* `SRT_ERDPERM`: The read from file operation has failed (`srt_sendfile`)
-* `SRT_EWRPERM`: The write to file operation has failed (`srt_recvfile`)
+  * `SRT_EINVRDOFF`: There is a mistake in `offset` or `size` parameters, which 
+  should match the index availability and size of the bytes available since 
+  `offset` index. This is actually reported for `srt_sendfile` when the `seekg` 
+  or `tellg` operations resulted in error.
+  * `SRT_EINVWROFF`: Like above, reported for `srt_recvfile` and `seekp`/`tellp`.
+  * `SRT_ERDPERM`: The read from file operation has failed (`srt_sendfile`).
+  * `SRT_EWRPERM`: The write to file operation has failed (`srt_recvfile`).
 
 
 Diagnostics
 -----------
+#### const char* srt_getlasterror_str
 
 ```
 const char* srt_getlasterror_str(void);
