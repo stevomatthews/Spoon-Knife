@@ -36,9 +36,17 @@ SRT API Functions
   * [srt_clearlasterror](#srt_clearlasterror)
 - [**Performance tracking**](#Performance-tracking)
   * [srt_bstats, srt_bistats](#srt_bstats-srt_bistats)
-- [**Asynchronous operations (EPoll)**](#Asynchronous-operations-EPoll)
-
-  
+- [**Asynchronous operations (epoll)**](#Asynchronous-operations-epoll)
+  * [srt_epoll_create](#srt_epoll_create)
+  * [srt_epoll_add_usock, srt_epoll_add_ssock, srt_epoll_update_usock, srt_epoll_update_ssock](#srt_epoll_add_usock-srt_epoll_add_ssock-srt_epoll_update_usock-srt_epoll_update_ssock)
+  * [srt_epoll_remove_usock, srt_epoll_remove_ssock](#srt_epoll_remove_usock-srt_epoll_remove_ssock)
+  * [srt_epoll_wait](#srt_epoll_wait)
+  * [srt_epoll_release](#srt_epoll_release)
+- [**Logging control**](#Logging-control)
+  * [srt_setloglevel](#srt_setloglevel)
+  * [srt_addlogfa, srt_dellogfa, srt_resetlogfa](#srt_addlogfa-srt_dellogfa-srt_resetlogfa)
+  * [srt_setloghandler](#srt_setloghandler)
+  * [srt_setlogflags](#srt_setlogflags)
 
 
 <br><br>
@@ -888,34 +896,39 @@ the value of `SRTO_RCVLATENCY`; otherwise 0.
 
 <br><br>
 
-Asynchronous operations (EPoll)
+Asynchronous operations (epoll)
 -------------------------------
 
 The epoll system is currently the only method for using multiple sockets in one
 thread with having the blocking operation moved to epoll waiting so that it can
-block on multiple sockets at once.
+block on multiple sockets at once. **???**
 
 The epoll system, similar to the one on Linux, relies on `eid` objects managed
 internally in SRT, which can be subscribed to particular sockets and the readiness
-status of particular operations, then the `srt_epoll_wait` function can be used
+status of particular operations. The `srt_epoll_wait` function can then be used
 to block until any readiness status in the whole `eid` is set.
 
+<br><br>
 
+#### srt_epoll_create
 ```
 int srt_epoll_create(void);
 ```
 
 Creates a new epoll container.
 
-Returns:
-* valid EID on success
-* -1 on failure
+- Returns:
+  * valid EID on success
+  * -1 on failure
 
-Errors:
-* `SRT_ECONNSETUP`: System operation failed. This is on systems that use
-a special method for system part of epoll and therefore associated resources,
+- Errors:
+  * `SRT_ECONNSETUP`: System operation failed. This is on systems that use a 
+special method for the system part of epoll and therefore associated resources,
 like epoll on Linux.
 
+<br><br>
+
+#### srt_epoll_add_usock, srt_epoll_add_ssock, srt_epoll_update_usock, srt_epoll_update_ssock
 
 ```
 int srt_epoll_add_usock(int eid, SRTSOCKET u, const int* events);
@@ -924,19 +937,18 @@ int srt_epoll_update_usock(int eid, SRTSOCKET u, const int* events);
 int srt_epoll_update_ssock(int eid, SYSSOCKET s, const int* events);
 ```
 
-This adds a socket to the container.
+Adds a socket to a container, or updates an existing socket.
 
-With `_usock` it adds a user socket (SRT socket), with `_ssock` it adds a
-system socket.
+The `_usock` suffix refers to a user socket (SRT socket). 
+The `_ssock` suffix refers to a system socket.
 
-The `_add_` functions add this socket anew. The `_update_` functions regard
-the fact that the socket is in the container already and just allow to
-change the subscription details. For example, if you have subscribed this
-socket so far with `SRT_EPOLL_OUT` to wait until it's connected, to change
-it into poll for read-readiness, you use this function with the same
-socket and use a variable set to `SRT_EPOLL_IN` this time. This will not
-only change the event type which is polled on the socket, but also remove
-any readiness status for flags that are no longer set.
+The `_add_` functions add new sockets. The `_update_` functions act on a socket 
+that is in the container already and just allow changes in the subscription 
+details. For example, if you have already subscribed a socket with `SRT_EPOLL_OUT` 
+to wait until it's connected, to change it into poll for read-readiness, you use 
+this function on that same socket with a variable set to `SRT_EPOLL_IN`. This 
+will not only change the event type which is polled on the socket, but also 
+remove any readiness status for flags that are no longer set.
 
 * `eid`: epoll container id
 * `u`: SRT socket
@@ -944,74 +956,85 @@ any readiness status for flags that are no longer set.
 * `events`: points to a variable set to epoll flags, or NULL if
 you want to subscribe a socket for all possible events
 
-Return: 0, if successful, otherwise -1
+- Return: 
+  * 0 if successful, otherwise -1
 
-Errors:
+- Errors:
 
-* `SRT_EINVPOLLID`: `eid` designates no valid EID object
+  * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 
 **BUG**: for `add_ssock` the system error results in an empty `CUDTException()`
 call which actually results in `SRT_SUCCESS`. For cases like that the
 `SRT_ECONNSETUP` code is predicted.
 
+<br><br>
+
+#### srt_epoll_remove_usock, srt_epoll_remove_ssock
 
 ```
 int srt_epoll_remove_usock(int eid, SRTSOCKET u);
 int srt_epoll_remove_ssock(int eid, SYSSOCKET s);
 ```
 
-Removes given socket from epoll container and clears all readiness
-state recorded in it for that socket.
+Removes a specified socket from an epoll container and clears all readiness
+states recorded for that socket.
 
-With `_usock` it removes a user socket (SRT socket), with `_ssock` it removes a
-system socket.
+The `_usock` suffix refers to a user socket (SRT socket). 
+The `_ssock` suffix refers to a system socket.
 
-Return: 0, if successful, otherwise -1
+- Return: 
+  * 0 if successful, otherwise -1
 
-Errors:
+- Errors:
 
-* `SRT_EINVPOLLID`: `eid` designates no valid EID object
+  * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 
+<br><br>
 
+#### srt_epoll_wait
 ```
 int srt_epoll_wait(int eid, SRTSOCKET* readfds, int* rnum, SRTSOCKET* writefds, int* wnum, int64_t msTimeOut,
                         SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
 ```
 
-This function blocks the call until any readiness in the epoll container.
+Blocks the call until any readiness state occurs in the epoll container.
 
 Readiness can be on a socket in the container for the event type as per
 subscription. The first readiness state causes this function to exit, but
 all ready sockets are reported. This function blocks until the timeout.
 If timeout is 0, it exits immediately after checking. If timeout is -1,
-blocks indefinitely until the readiness.
+it blocks indefinitely until a readiness state occurs.
 
 * `eid`: epoll container
-* `readfds` and `rnum`: Array to write SRT sockets that are read-reday (and its length)
+* `readfds` and `rnum`: Array to write SRT sockets that are read-ready (and its **???** length)
 * `writefds` and `wnum`: Array to write SRT sockets that are write-ready (and its length)
-* `msTimeOut`: Timeout specified in milliseconds, or special values: 0 or -1
+* `msTimeOut`: Timeout specified in milliseconds, or special values (0 or -1)
 * `lwfds` and `lwnum`: Array to write system sockets that are read-ready (and its length)
 * `lwfds` and `lwnum`: Array to write system sockets that are write-ready (and its length)
 
-Note that there is no space here to return erroneous sockets. If an error occurred
-on a socket then such a socket is reported in both read-ready and write-ready arrays,
+Note that there is no space here to return erroneous sockets. **???** If an error occurred
+on a socket then that socket is reported in both read-ready and write-ready arrays,
 regardless of what event types it was subscribed for. Usually then you subscribe
 given socket for only read readiness, for example (`SRT_EPOLL_IN`), but pass both
 arrays for read and write readiness. This socket will not be reported in the write
-readiness array even if it's write ready, but it will be reported there, if the
+readiness array even if it's write ready, but it will be reported there if the
 operation on this socket encountered an error.
 
 Return:
-* \>0 number of ready sockets (of whatever kind), if any were ready
+
+* The number (\>0) of ready sockets, of whatever kind (if any)
 * -1 in case of error
 
 Errors:
 
 * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 * `SRT_ETIMEOUT`: Up to `msTimeOut` no sockets subscribed in `eid` were ready.
-This is reported only if `msTimeOut` was >=0, otherwise the function is waiting
+This is reported only if `msTimeOut` was \>=0, otherwise the function waits
 indefinitely.
 
+<br><br>
+
+#### srt_epoll_release
 ```
 int srt_epoll_release(int eid);
 ```
@@ -1019,42 +1042,53 @@ int srt_epoll_release(int eid);
 Deletes the epoll container.
 
 Return:
-* \>0 number of ready sockets (of whatever kind), if any were ready
+
+* The number (\>0) of ready sockets, of whatever kind (if any)
 * -1 in case of error
 
 Errors:
 
 * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 
+<br><br>
+
 Logging control
 ---------------
 
 SRT has a widely used system of logs, as this is usually the only way to determine
-how the internals are working, without changing the rules by the fact of tracing.
+how the internals are working, without changing the rules by the act of tracing.
 Logs are split into levels (5 levels out of those defined by syslog are in use)
-and additional filtering is possible on FA (functional area). By default only
-up to Note log level are displayed and from all FAs. The logging can be only
-manipulated globally with no regard to a particular socket; this would be rather
-impossible because lots of areas in SRT do not work dedicated for any particular
-socket, and some are shared between sockets.
+and additional filtering is possible by FA (functional area). By default, only
+entries up to the *Note* log level are displayed from all FAs. 
+
+Logging can only be manipulated globally, with no regard to a specific 
+socket. This is because lots of operations in SRT are not dedicated to any 
+particular socket, and some are shared between sockets.
+
+<br><br>
+
+#### srt_setloglevel
 
 ```
 void srt_setloglevel(int ll);
 ```
 
-Sets the minimum severity for logging. Minimum, that is, particular log is
-displayed only if it is the same or more severe than the set value. Setting
-this value to `LOG_DEBUG` turns on all other levels, for example.
+Sets the minimum severity for logging. A particular log entry is displayed only 
+if it has a severity greater than or equal to the minimum. Setting this value 
+to `LOG_DEBUG` turns on all levels.
 
-Constants for this value are those from `<sys/syslog.h>`
-(for Windows there is a replacement at `common/win/syslog_defs.h`), although the
-only meaningful are:
+The constants for this value are those from `<sys/syslog.h>`
+(for Windows, refer to `common/win/syslog_defs.h`). The most meaningful are:
 
-* `LOG_DEBUG`: Most detailed and very often messages
+* `LOG_DEBUG`: Highly detailed and very frequent messages
 * `LOG_NOTICE`: Occasionally displayed information
 * `LOG_WARNING`: Unusual behavior
 * `LOG_ERR`: Abnormal behavior
-* `LOG_CRIT`: Error that makes the current socket no more usable
+* `LOG_CRIT`: Error that makes the current socket unusable
+
+<br><br>
+
+#### srt_addlogfa, srt_dellogfa, srt_resetlogfa
 
 ```
 void srt_addlogfa(int fa);
@@ -1062,15 +1096,18 @@ void srt_dellogfa(int fa);
 void srt_resetlogfa(const int* fara, size_t fara_size);
 ```
 
-FA (functional area) is an additional filtering mechanism for logging. You
-can select only particular FAs to be turned on, for others the logging
-messages will not appear. The list of FAs is collected in `srt.h` file
-with `SRT_LOGFA_` prefix. Not enumerating them here because they may get
-changed very often.
+A functional area (FA) is an additional filtering mechanism for logging. You can 
+select only particular FA to be turned on. For others the logging messages will 
+not appear. The list of FAs is collected in `srt.h` file, as identified by the 
+`SRT_LOGFA_` prefix. They are not enumerated here because they may get changed 
+very often.
 
-At least by default all FAs are turned on, except special dangerous ones
+All FAs are turned on by default, except potentially dangerous ones
 (such as `SRT_LOGFA_HAICRYPT`).
 
+<br><br>
+
+#### srt_setloghandler
 ```
 void srt_setloghandler(void* opaque, SRT_LOG_HANDLER_FN* handler);
 ```
@@ -1078,18 +1115,24 @@ void srt_setloghandler(void* opaque, SRT_LOG_HANDLER_FN* handler);
 By default logs are printed to standard error stream. This function replaces
 the sending to a stream with a handler function that will receive them.
 
+<br><br>
+
+#### srt_setlogflags
 ```
 void srt_setlogflags(int flags);
 ```
 
-When you set a handler, you usually may need to configure what is passed in
-the log line so that it doesn't duplicate the information or pass the log
-line not exactly in the expected form. These flags are collected in
-`logging_api.h` public header:
+When you set a handler, you usually need to configure what is passed in 
+the log line so that it doesn't duplicate the information, or get passed in an 
+unexpected form. 
+
+The following flags are collected in the `logging_api.h` public header:
 
 * `SRT_LOGF_DISABLE_TIME`: Do not provide the time in the header
-* `SRT_LOGF_DISABLE_THREADNAME`: Do not provide thread name in the header
+* `SRT_LOGF_DISABLE_THREADNAME`: Do not provide the thread name in the header
 * `SRT_LOGF_DISABLE_SEVERITY`: Do not provide severity information in the header
 * `SRT_LOGF_DISABLE_EOL`: Do not add the end-of-line character to the log line
+
+<br><br>
 
 [RETURN TO TOP OF PAGE](#SRT-API-Functions)
