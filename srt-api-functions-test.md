@@ -34,8 +34,8 @@ SRT API Functions
   * [srt_getlasterror](#srt_getlasterror)
   * [srt_strerror](#srt_strerror)
   * [srt_clearlasterror](#srt_clearlasterror)
-- [Performance tracking](#Performance-tracking)
-  * [srt_bstats, srt_bistats](#srt_bstats-srt_bistats)]
+- [**Performance tracking**](#Performance-tracking)
+  * [srt_bstats, srt_bistats](#srt_bstats-srt_bistats)
 
   
 
@@ -789,34 +789,34 @@ int srt_bistats(SRTSOCKET u, SRT_TRACEBSTATS * perf, int clear, int instantaneou
 
 Reports the current statistics
 
-* `u`: Socket to get stats from
+* `u`: Socket from which to get statistics
 * `perf`: Pointer to an object to be written with the statistics
-* `clear`: 1 if the statis should be cleared after retrieval
+* `clear`: 1 if the statistics should be cleared after retrieval
 * `instantaneous`: 1 if the statistics should use instant data, not moving averages
 
-The `SRT_TRACEBSTATS` is an alias to `struct CBytePerfMon`. The meaning of most
-of the field should be enough comprehensible in the header file comments. Here
-are some less obvious fields in this structure (instant measurements):
+`SRT_TRACEBSTATS` is an alias to `struct CBytePerfMon`. Most of the fields are 
+reasonably well described in the header file comments. Here are descriptions of 
+some less obvious fields in this structure (instant measurements):
 
-* `usPktSndPeriod`: sending period. This is the minimum time that must be kept
-between two consecutively sent packets over the link used by this socket (note
+* `usPktSndPeriod`: This is the minimum time (sending period) that must be kept
+between two packets sent consecutively over the link used by this socket. Note
 that sockets sharing one outgoing port use the same underlying UDP socket and
-therefore the same link and the same sender queue). In other word, this is the
-inversion of maximum sending speed. This isn't the EXACT time distance between
-two consecutive sendings because in case when the time spent by the application
-between two consecutive sendings exceeds this time, then simply the next packet
-will be sent immediately, and additionally the extra wasted time will be
-"repaid" at the next sending.
+therefore the same link and the same sender queue. `usPktSndPeriod` is the
+inversion of the maximum sending speed. It isn't the EXACT time interval between
+two consecutive sendings because in the case where the time spent by the 
+application between two consecutive sendings exceeds `usPktSndPeriod`, the next 
+packet will be sent immediately. The extra "wasted" time will be accounted for 
+at the next sending.
 
-* `pktFlowWindow`: The "flow window" size, it's actually the number of free space
-in the peer receiver, as read on the sender, in the number of packets. When this
-value drops to zero, the next sending packet will be simply dropped by the receiver
-without processing. In the file mode this may cause slowdown of sending in order
-to wait until the receiver clears things up; in live mode the receiver buffer
-should normally occupy not more than half of the buffer size (default 8192).
-If this size is less than this half and declines, it means that the receiver
-cannot process the incoming stream fast enough and this may in perspective lead
-to a dropped connection.
+* `pktFlowWindow`: The amount of free space ("flow window" size) on the receiver, 
+as read on the sender based on the number of packets. **???** When this
+value drops to zero, the next packet sent will be dropped by the receiver
+without processing. In file mode this may cause a slowdown of sending in order
+to wait until the receiver makes more space available. **???**; in live mode the 
+receiver buffer contents should normally occupy not more than half of the buffer 
+size (default 8192). If this **???** size is less than this **???** half and 
+declines, it means that the receiver cannot process the incoming stream fast 
+enough and this may lead to a dropped connection.
 
 * `pktCongestionWindow`: The "congestion window" in packets. In File mode this
 value starts with 16 and is increased with every number of reported
@@ -1089,3 +1089,4 @@ line not exactly in the expected form. These flags are collected in
 * `SRT_LOGF_DISABLE_SEVERITY`: Do not provide severity information in the header
 * `SRT_LOGF_DISABLE_EOL`: Do not add the end-of-line character to the log line
 
+[RETURN TO TOP OF PAGE](#SRT-API-Functions)
