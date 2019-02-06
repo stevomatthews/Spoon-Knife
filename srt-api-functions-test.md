@@ -36,6 +36,7 @@ SRT API Functions
   * [srt_clearlasterror](#srt_clearlasterror)
 - [**Performance tracking**](#Performance-tracking)
   * [srt_bstats, srt_bistats](#srt_bstats-srt_bistats)
+- [**Asynchronous operations (EPoll)**](#Asynchronous-operations-EPoll)
 
   
 
@@ -818,56 +819,56 @@ size (default 8192). If this **???** size is less than this **???** half and
 declines, it means that the receiver cannot process the incoming stream fast 
 enough and this may lead to a dropped connection.
 
-* `pktCongestionWindow`: The "congestion window" in packets. In File mode this
-value starts with 16 and is increased with every number of reported
-acknowledged packets, then also updated basing on the receiver-reported
+* `pktCongestionWindow`: The "congestion window" in packets. In file mode this
+value starts at 16 and is increased with every number of reported
+acknowledged packets, and then is also updated based on the receiver-reported
 delivery rate. It represents the maximum number of packets that can be safely
 sent now without causing congestion. The higher this value, the faster the
-packets can be sent. In Live mode this field is not really in use.
+packets can be sent. In live mode this field is not used.
 
-* `pktFlightSize`: Number of packets in flight. This is the distance between
-the packet sequence number that was last reported by ACK message and the
-sequence number of the packet just sent. Note that ACK gets received
-periodically, so this value is most accurate just after receiving ACK and
-becomes a little exaggerated in time until the next ACK comes.
+* `pktFlightSize`: The number of packets in flight. This is the difference 
+between the packet sequence number that was last reported by an ACK message and 
+the sequence number of the packet just sent. Note that ACKs are received
+periodically, so this value is most accurate just after receiving an ACK and
+becomes a little exaggerated over time until the next ACK arrives.
 
-* `msRTT`: The RTT (Round-Trip time), it's the sum of two STT (Single-Trip
-time) values, one from agent to peer and one from peer to agent. Beware that
-the measurement method is different than on TCP; SRT measures only the "reverse
-RTT", that is, the time measured at the receiver as between sending `UMSG_ACK`
-message until receiving the sender-responded `UMSG_ACKACK` message with the
-same journal. This theoretically shouldn't, but still happens to be a little
-different to "forward RTT", that is, the time between sending a data packet of
-particular sequence number and receiving `UMSG_ACK` with that sequence number
-later by 1, as it's being measured on TCP. The "forward RTT" isn't being
-measured nor reported in SRT.
+* `msRTT`: The RTT (Round-Trip time) is the sum of two STT (Single-Trip time) 
+values, one from agent to peer, and one from peer to agent. Note that *the 
+measurement method is different than on TCP*; SRT measures only the "reverse
+RTT", that is, the time measured at the receiver between sending a `UMSG_ACK`
+message until receiving the sender-responded `UMSG_ACKACK` message (with the
+same journal). This happens to be a little different to the  "forward RTT" as 
+measured in TCP, which is the time between sending a data packet of a particular 
+sequence number and receiving `UMSG_ACK` with a sequence number that is later 
+by 1. Forward RTT isn't being measured or reported in SRT.
 
-* `mbpsBandwidth`: The bandwidth, in Mb/s. This is measured at the receiver
-and sent back to the sender. This is using running average calculation at
-the receiver side.
+* `mbpsBandwidth`: The bandwidth in Mb/s. The bandwidth is measured at the 
+receiver, which sends back a running average calculation to the sender.
 
-* `byteAvailSndBuf`: Bytes available in the sender buffer. It decreases with
-data scheduled for sending by the application and increases with every ACK
-received from the receiver, after the packets are sent over the UDP link.
+* `byteAvailSndBuf`: The number of bytes available in the sender buffer. This 
+value decreases with data scheduled for sending by the application, and increases 
+with every ACK received from the receiver, after the packets are sent over 
+the UDP link.
 
-* ` byteAvailRcvBuf`: Bytes available in the receiver buffer.
+* ` byteAvailRcvBuf`: The number of bytes available in the receiver buffer.
 
-* `mbpsMaxBW`: Usually this is the setting from `SRTO_MAXBW` option, including
-value 0 (unlimited). Might be that under certain conditions a nonzero value can
-be provided by appropriate Smoother, although none of builtin Smoothers currently
-uses it.
+* `mbpsMaxBW`: The maximum bandwidth in Mb/s. Usually this is the setting from 
+the `SRTO_MAXBW` option, which may include the value 0 (unlimited). Under certain 
+conditions a nonzero value might be be provided by the appropriate congestion 
+control module, although none of the built-in congestion control modules 
+currently uses it.  **???**
 
-* `byteMSS`: Same as a value from `SRTO_MSS` option.
+* `byteMSS`: Same as a value from `SRTO_MSS` option. **???**
 
-* `pktSndBuf`: Number of packets in the sending buffer, that is, already scheduled
-for sending and possibly sent, but not yet acknowledged.
+* `pktSndBuf`: The number of packets in the send buffer that are already 
+scheduled for sending and possibly sent, but not yet acknowledged.
 
-* `byteSndBuf`: Same as above, in bytes
+* `byteSndBuf`: Same as `pktSndBuf`, in bytes.
 
-* `msSndBuf`: Same as above, but expressed as a time distance between the
-oldest and the latest packet scheduled for sending
+* `msSndBuf`: Same as `pktSndBuf`, but expressed as a time interval between the
+oldest and the latest packet scheduled for sending.
 
-* `msSndTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for Live mode), it returns
+* `msSndTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for live mode), it returns
 the value of `SRTO_PEERLATENCY`, otherwise 0.
 
 * `pktRcvBuf`: Number of packets in the receiver buffer.  Note that in
@@ -876,14 +877,16 @@ in the buffer and will not be signed off to the application until the "time to
 play" comes. In File mode it directly means that all that is above 0 can (and
 shall) be read right now.
 
-* `byteRcvBuf`: Like above, in bytes.
-* `msRcvBuf`: Time distance between the first and last available packet in the
-receiver buffer. Note that this range includes all packets regardless if they
-are ready to play or not.
+* `byteRcvBuf`: Like `pktRcvBuf`, in bytes.
 
-* `msRcvTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for Live mode), it returns
-the value of `SRTO_RCVLATENCY`, otherwise 0.
+* `msRcvBuf`: Time interval between the first and last available packets in the
+receiver buffer. Note that this range includes all packets regardless of whether 
+they are ready to play or not.
 
+* `msRcvTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for live mode), it returns
+the value of `SRTO_RCVLATENCY`; otherwise 0.
+
+<br><br>
 
 Asynchronous operations (EPoll)
 -------------------------------
