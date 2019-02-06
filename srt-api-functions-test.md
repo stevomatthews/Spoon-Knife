@@ -157,8 +157,7 @@ as `SRTO_REUSEADDR` is set to *true* (default).
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
   * `SRT_ECONNSETUP`: Internal creation of a UDP socket failed 
   * `SRT_ESOCKFAIL`: Internal configuring of a UDP socket (`bind`, `setsockopt`) failed
-  
-  <br><br>
+<br><br>
 
 ### srt_create_socket
 ```
@@ -497,6 +496,7 @@ and specifies some special extra parameters:
 * `flags`: [IN, OUT]. RESERVED FOR FUTURE USE (should be 0). This is
 intended to specify some special options controlling the details of how the
 called function should work.
+
 * `msgttl`: [IN]. In **message** and **live mode** only, specifies the TTL for 
 sending messages (in `[ms]`). Not used for receiving messages. A packet is 
 scheduled for sending by this call and then waits in the sender buffer to be 
@@ -505,24 +505,29 @@ which may be blocked when the data are scheduled faster than the network can
 afford to send. Default -1 means to wait indefinitely. If specified, then the 
 packet waits for an opportunity to be sent over the network only up to this TTL, 
 and then, if still not sent, the packet is discarded.
+
 * `inorder`: [IN]. In **message mode** only, specifies that sent messages should 
 be extracted by the receiver in the order of sending. This can be meaningful if 
 a packet loss has happened, and a particular message must wait for retransmission 
 so that it can be reassembled and then delivered. When this flag is false, the 
 message can be delivered even if there are any previous messages still waiting 
 for completion.
+
 * `boundary`: RESERVED FOR FUTURE USE. Intended to be used in a special mode 
 when you are allowed to send or retrieve a part of the message.
+
 * `srctime`:
    * [IN] Sender only. Specifies the application-provided timestamp. If not used
 (specified as 0), the current system time (absolute microseconds since epoch) is 
 used.
    * [OUT] Receiver only. Specifies the time when the packet was intended to be
 delivered to the receiver.
+
 * `pktseq`: Receiver only. Reports the sequence number for the packet carrying
 out the payload being returned. If the payload is carried out by more than one
 UDP packet, only the sequence of the first one is reported. Note that in
 **live mode** there's always one UDP packet per message.
+
 * `msgno`: Message number that can be sent by both sender and receiver,
 although it is required that this value remain monotonic in subsequent send calls. 
 Normally message numbers start with 1 and increase with every message sent.
@@ -1094,10 +1099,10 @@ void srt_resetlogfa(const int* fara, size_t fara_size);
 A functional area (FA) is an additional filtering mechanism for logging. You can 
 select only particular FA to be turned on. For others the logging messages will 
 not appear. The list of FAs is collected in `srt.h` file, as identified by the 
-`SRT_LOGFA_` prefix. They are not enumerated here because they may get changed 
+`SRT_LOGFA_` prefix. They are not enumerated here because they may be changed 
 very often.
 
-All FAs are turned on by default, except potentially dangerous ones
+All FAs are turned on by default, except potentially dangerous **???** ones
 (such as `SRT_LOGFA_HAICRYPT`).
 <br><br>
 
