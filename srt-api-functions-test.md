@@ -48,36 +48,36 @@ SRT API Functions
   * [srt_setloghandler](#srt_setloghandler)
   * [srt_setlogflags](#srt_setlogflags)
 
-
 <br><br>
 
 Library initialization
 ----------------------
 
-#### srt_startup
+### srt_startup
 ```
 int srt_startup(void);
 ```
 
 This function shall be called at the start of an application that uses the SRT
 library. It provides all necessary platform-specific initializations, sets up
-global data, and starts the SRT GC thread. If this function isn't explicitly called,
-it will be called automatically when creating the first socket. However, relying on
-this behavior is strongly discouraged.
+global data, and starts the SRT GC thread. If this function isn't explicitly 
+called, it will be called automatically when creating the first socket. However, 
+relying on this behavior is strongly discouraged.
 
 - Returns:
+
   *  0 = successfully run, or already started
   *  1 = this is the first startup, but the GC thread is already running
   * -1 = failed
 
 - Errors:
+
   * `SRT_ECONNSETUP` (with error code set): Reported when required system
 resource(s) failed to initialize. This is currently used only on Windows to 
 report a failure from `WSAStartup`.
-
 <br><br>
 
-#### srt_cleanup
+### srt_cleanup
 ```
 int srt_cleanup(void);
 ```
@@ -85,19 +85,19 @@ int srt_cleanup(void);
 This function cleans up all global SRT resources and shall be called just before 
 exiting the application that uses the SRT library.
 
-- Returns: 
+- Returns:
+ 
   * 0 = for future use
 
 **IMPORTANT**: Note that the startup/cleanup calls have an instance counter.
 This means that if you call `srt_startup` multiple times, you need to call the 
 `srt_cleanup` function exactly the same number of times.
-
 <br><br>
 
 Creating and configuring sockets
 -------------------------------
 
-#### srt_socket
+### srt_socket
 ```
 SRTSOCKET srt_socket(int af, int type, int protocol);
 ```
@@ -107,34 +107,36 @@ Creates an SRT socket:
 * `af`: family (either `AF_INET` or `AF_INET6`)
 * `type`, `protocol`: ignored
 
-**NOTE:** The UDT library uses the `type` parameter to specify file or message 
-mode by specifying that `SOCK_STREAM` corresponds to a TCP-like file transmission 
-mode, and `SOCK_DGRAM` corresponds to an SCTP-like message transmission mode. 
-SRT still supports these modes. However, this is controlled by the `SRTO_MESSAGEAPI` 
-socket option when the transmission type is file (`SRTO_TRANSTYPE` set to `SRTT_FILE`) 
-and the only reasonable value for the `type` parameter here is `SOCK_DGRAM`.
+**NOTE:** The UDT library uses the `type` parameter to specify **file** or 
+**message mode** by specifying that `SOCK_STREAM` corresponds to a TCP-like file 
+transmission mode, and `SOCK_DGRAM` corresponds to an SCTP-like message 
+transmission mode. SRT still supports these modes. However, this is controlled 
+by the `SRTO_MESSAGEAPI` socket option when the transmission type is file 
+(`SRTO_TRANSTYPE` set to `SRTT_FILE`) and the only reasonable value for the 
+`type` parameter here is `SOCK_DGRAM`.
 
 - Returns:
+
   * a valid socket ID on success
   * `INVALID_SOCKET` (-1) on error
 
 - Errors:
+
   * `SRT_ENOTBUF`: not enough memory to allocate required resources
 
-**NOTE:** This is probably a design flaw (bug?). Usually underlying system errors 
-are reported by `SRT_ECONNSETUP`.
-
+**NOTE:** This is probably a design flaw (**BUG?**). Usually underlying system 
+errors are reported by `SRT_ECONNSETUP`.
 <br><br>
 
-#### srt_bind
+### srt_bind
 ```
 int srt_bind(SRTSOCKET u, const struct sockaddr* name, int namelen);
 ```
 
 Binds a socket to a local address and port. Binding specifies the local network
-interface and the UDP port number to be used for the socket. When the local address
-is a form of `INADDR_ANY`, then it's bound to all interfaces. When the port number
-is 0, then the port number will be system-allocated if necessary.
+interface and the UDP port number to be used for the socket. When the local 
+address is a form of `INADDR_ANY`, then it's bound to all interfaces. When the 
+port number is 0, then the port number will be system-allocated if necessary.
 
 For a listening socket this call is obligatory. It defines the network interface
 and the port where the listener should expect a call request. For a connecting 
@@ -145,9 +147,11 @@ as `SRTO_REUSEADDR` is set to *true* (default).
 *See **NOTE** below under* [`srt_create_socket`](#srt_create_socket).
 
 - Returns:
+
   * `SRT_ERROR` (-1) on error, otherwise 0
 
 - Errors:
+
   * `SRT_EINVSOCK`: Socket passed as `u` designates no valid socket
   * `SRT_EINVOP`: Socket already bound
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
@@ -156,8 +160,7 @@ as `SRTO_REUSEADDR` is set to *true* (default).
   
   <br><br>
 
-
-#### srt_create_socket
+### srt_create_socket
 ```
 SRTSOCKET srt_create_socket();
 ```
@@ -169,20 +172,18 @@ configuration, which will free the user from specifying it in `srt_socket`.
 The `srt_create_socket` function will be used for all families. The family will 
 be specified only with the first `srt_bind` or `srt_connect`, and in this case 
 `SRT_EINVPARAM` will not be used (see [`srt_bind`](#srt_bind) above).
-
 <br><br>
 
-#### srt_bind_peerof
+### srt_bind_peerof
 
 ```
 int srt_bind_peerof(SRTSOCKET u, UDPSOCKET udpsock);
 ```
 
 A version of `srt_bind` that acquires a given UDP socket instead of creating one.
-
 <br><br>
 
-#### srt_getsockstate
+### srt_getsockstate
 
 ```
 SRT_SOCKSTATUS srt_getsockstate(SRTSOCKET u);
@@ -206,10 +207,9 @@ be completed before closing)
 * `SRTS_CLOSED`: The socket has been closed, but not yet removed by the GC
 thread
 * `SRTS_NONEXIST`: The specified number does not correspond to a valid socket.
-
 <br><br>
 
-#### rt_getsndbuffer
+### rt_getsndbuffer
 
 ```
 int srt_getsndbuffer(SRTSOCKET sock, size_t* blocks, size_t* bytes);
@@ -223,10 +223,9 @@ Retrieves information about the sender buffer.
 
 This function can be used for diagnostics. It is especially useful when the 
 socket needs to be closed asynchronously.
-
 <br><br>
 
-#### srt_close
+### srt_close
 
 ```
 int srt_close(SRTSOCKET u);
@@ -236,17 +235,18 @@ Closes the socket and frees all used resources. Note that underlying UDP sockets
 may be shared between sockets, so these are freed only with the last user closed.
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
-  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
 
+  * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
 <br><br>
 
 Connecting
 ----------
 
-#### srt_listen
+### srt_listen
 ```
 int srt_listen(SRTSOCKET u, int backlog);
 ```
@@ -256,9 +256,11 @@ defines how many sockets may be allowed to wait until they are accepted
 (excessive connection requests are rejected in advance).
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0.
 
 - Errors:
+
   * `SRT_EINVPARAM`: Value of `backlog` is 0 or negative.
   * `SRT_EINVSOCK`: Socket `u` indicates no valid SRT socket.
   * `SRT_EUNBOUNDSOCK`: `srt_bind` has not yet been called on that socket.
@@ -269,10 +271,9 @@ defines how many sockets may be allowed to wait until they are accepted
 occupied by another listening socket. Binding multiple sockets to one IP address 
 and port is allowed, as long as `SRTO_REUSEADDR` is set to true, but only one of 
 these sockets can be set up as a listener.
-
 <br><br>
 
-#### srt_accept
+### srt_accept
 
 ```
 SRTSOCKET srt_accept(SRTSOCKET lsn, struct sockaddr* addr, int* addrlen);
@@ -292,13 +293,15 @@ Otherwise `addr` should specify an object into which the address will be written
 and `addrlen` must also specify a variable to contain the object size.
 
 - Returns:
+
   * A valid socket ID for the connection, on success
   * `SRT_ERROR` (-1) on failure 
 
 - Errors:
+
   * `SRT_EINVPARAM`: NULL specified as `addrlen`, when `addr` is not NULL
   * `SRT_EINVSOCK`: `lsn` designates no valid socket ID. Can also mean Internal
-Error when an error occurred while creating an accepted socket (**BUG**?)
+Error when an error occurred while creating an accepted socket (**BUG?**)
   * `SRT_ENOLISTEN`: `lsn` is not set up as a listener (`srt_listen` not called,
 or the listener socket has already been closed)
   * `SRT_ERDVNOSERV`: Internal error (if no `SRT_ENOLISTEN` reported, it means
@@ -308,10 +311,9 @@ not allow it)
 when the `lsn` listener socket was configured as non-blocking for reading
 (`SRTO_RCVSYN` set to false); otherwise the call blocks until a connection
 is reported or an error occurs
-
 <br><br>
 
-#### srt_connect
+### srt_connect
 
 ```
 int srt_connect(SRTSOCKET u, const struct sockaddr* name, int namelen);
@@ -333,9 +335,11 @@ bound to `INADDR_ANY` (which binds on all interfaces) and port 0 (which
 makes the system assign the port automatically).
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
+
   * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
   * `SRT_ERDVUNBOUND`: Socket `u` has set `SRTO_RENDEZVOUS` to true, but `srt_bind`
@@ -344,10 +348,9 @@ rendezvous socket, but rendezvous sockets must be explicitly bound to a local
 interface prior to connecting. Non-rendezvous sockets (caller sockets) can be
 left without binding - the call to `srt_connect` will bind them automatically.
   * `SRT_ECONNSOCK`: Socket `u` is already connected
-
 <br><br>
 
-#### srt_connect_debug
+### srt_connect_debug
 
 ```
 int srt_connect_debug(SRTSOCKET u, const struct sockaddr* name, int namelen, int forced_isn);
@@ -357,10 +360,9 @@ This function is for developers only and can be used for testing. It does the
 same thing as [`srt_connect`](#srt_connect), with the exception that it allows 
 specifying the Initial Sequence Number for data transmission. Normally this value 
 is generated randomly.
-
 <br><br>
 
-#### srt_rendezvous
+### srt_rendezvous
 ```
 int srt_rendezvous(SRTSOCKET u, const struct sockaddr* local_name, int local_namelen,
         const struct sockaddr* remote_name, int remote_namelen);
@@ -373,13 +375,12 @@ setting the `SRTO_RENDEZVOUS` option to true, and doing `srt_connect`.
 * `remote_name`: specifies the remote party's IP address and port
 
 **NOTE:** The port value shall be the same in `local_name` and `remote_name`.
-
 <br><br>
 
 Options and properties
 ----------------------
 
-#### srt_getpeername
+### srt_getpeername
 ```
 int srt_getpeername(SRTSOCKET u, struct sockaddr* name, int* namelen);
 ```
@@ -387,15 +388,16 @@ int srt_getpeername(SRTSOCKET u, struct sockaddr* name, int* namelen);
 Retrieves the remote address to which the socket is connected.
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
+
   * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_ENOCONN`: Socket `u` isn't connected, so there's no remote address to return
-
 <br><br>
 
-#### srt_getsockname
+### srt_getsockname
 ```
 int srt_getsockname(SRTSOCKET u, struct sockaddr* name, int* namelen);
 ```
@@ -407,16 +409,17 @@ with binding for system autoselection. With this function you can extract the
 port number after it has been autoselected.
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
+
   * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_ENOCONN`: Socket `u` isn't bound, so there's no local
-address to return (**BUG**? It should rather be `SRT_EUNBOUNDSOCK`)
-
+address to return (**BUG?** It should rather be `SRT_EUNBOUNDSOCK`)
 <br><br>
 
-#### srt_getsockopt, srt_getsockflag
+### srt_getsockopt, srt_getsockflag
 ```
 int srt_getsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, void* optval, int* optlen);
 int srt_getsockflag(SRTSOCKET u, SRT_SOCKOPT opt, void* optval, int* optlen);
@@ -432,15 +435,16 @@ type. Specifications are provided in the `apps/socketoptions.hpp` file at the
 `srt_options` object declaration.
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 - Errors:
+
   * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_EINVOP`: Option `opt` indicates no valid option
-
 <br><br>
 
-#### srt_setsockopt, srt_setsockflag
+### srt_setsockopt, srt_setsockflag
 
 ```
 int srt_setsockopt(SRTSOCKET u, int level /*ignored*/, SRT_SOCKOPT opt, const void* optval, int optlen);
@@ -456,20 +460,21 @@ assigned to a particular option, and to pass a variable of the appropriate data
 type with the option value to be set.
 
 - Returns:
+
   * `SRT_ERROR` (-1) in case of error, otherwise 0
 
 -Errors:
+
   * `SRT_EINVSOCK`: Socket `u` indicates no valid socket ID
   * `SRT_EINVOP`: Option `opt` indicates no valid option
   * Various other errors that may result from problems when setting a specific 
   option (see option description for details).
-  
-<br><br>
+  <br><br>
 
 Helper data types for transmission
 ----------------------------------
 
-#### SRT_MSGCTRL
+### SRT_MSGCTRL
 
 The `SRT_MSGCTRL` structure:
 
@@ -492,17 +497,17 @@ and specifies some special extra parameters:
 * `flags`: [IN, OUT]. RESERVED FOR FUTURE USE (should be 0). This is
 intended to specify some special options controlling the details of how the
 called function should work.
-* `msgttl`: [IN]. In Message and Live mode only, specifies the TTL for sending 
-messages (in `[ms]`). Not used for receiving messages. A packet is scheduled 
-for sending by this call and then waits in the sender buffer to be picked up at 
-the moment when all previously scheduled data are already sent, which may be 
-blocked when the data are scheduled faster than the network can afford to send. 
-Default -1 means to wait indefinitely. If specified, then the packet waits for 
-an opportunity to be sent over the network only up to this TTL, and then, if 
-still not sent, the packet is discarded.
-* `inorder`: [IN]. In Message mode only, specifies that sent messages should be 
-extracted by the receiver in the order of sending. This can be meaningful if a 
-packet loss has happened, and a particular message must wait for retransmission 
+* `msgttl`: [IN]. In **message** and **live mode** only, specifies the TTL for 
+sending messages (in `[ms]`). Not used for receiving messages. A packet is 
+scheduled for sending by this call and then waits in the sender buffer to be 
+picked up at the moment when all previously scheduled data are already sent, 
+which may be blocked when the data are scheduled faster than the network can 
+afford to send. Default -1 means to wait indefinitely. If specified, then the 
+packet waits for an opportunity to be sent over the network only up to this TTL, 
+and then, if still not sent, the packet is discarded.
+* `inorder`: [IN]. In **message mode** only, specifies that sent messages should 
+be extracted by the receiver in the order of sending. This can be meaningful if 
+a packet loss has happened, and a particular message must wait for retransmission 
 so that it can be reassembled and then delivered. When this flag is false, the 
 message can be delivered even if there are any previous messages still waiting 
 for completion.
@@ -517,7 +522,7 @@ delivered to the receiver.
 * `pktseq`: Receiver only. Reports the sequence number for the packet carrying
 out the payload being returned. If the payload is carried out by more than one
 UDP packet, only the sequence of the first one is reported. Note that in
-Live mode there's always one UDP packet per message.
+**live mode** there's always one UDP packet per message.
 * `msgno`: Message number that can be sent by both sender and receiver,
 although it is required that this value remain monotonic in subsequent send calls. 
 Normally message numbers start with 1 and increase with every message sent.
@@ -534,13 +539,11 @@ a function that fills the object with default values. The second is a constant
 object and can be used as a source for assignment. Note that you cannot pass 
 this constant object into any of the API functions because they require it to be 
 mutable, as they use some fields to output values.
-
 <br><br>
 
 Transmission
 ------------
-#### srt_send, srt_sendmsg, srt_sendmsg2
-
+### srt_send, srt_sendmsg, srt_sendmsg2
 ```
 int srt_send(SRTSOCKET u, const char* buf, int len);
 int srt_sendmsg(SRTSOCKET u, const char* buf, int len, int ttl/* = -1*/, int inorder/* = false*/);
@@ -574,20 +577,21 @@ single call to this function determines a message's boundaries.
 `SRTO_PAYLOADSIZE`, which can't be larger than 1456 bytes (1316 default).
 
 - Returns:
-  * Size of the data sent, if successful. Note that in file/stream mode the
+
+  * Size of the data sent, if successful. Note that in **file/stream mode** the
 returned size may be less than `len`, which means that it didn't send the
 whole contents of the buffer. You would need to call this function again
 with the rest of the buffer next time to send it completely. In both
-file/message and live mode the successful return is always equal to `len`
+**file/message** and **live mode** the successful return is always equal to `len`
   * In case of error, `SRT_ERROR` (-1)
 
 - Errors:
 
   * `SRT_ENOCONN`: Socket `u` used when the operation is not connected.
   * `SRT_ECONNLOST`: Socket `u` used for the operation has lost its connection.
-  * `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
-    * Live mode: trying to send more bytes at once than `SRTO_PAYLOADSIZE`
-  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
+  * `SRT_EINVALMSGAPI`: Incorrect API usage in **message mode**:
+    * **live mode**: trying to send more bytes at once than `SRTO_PAYLOADSIZE`
+  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in **stream mode**:
     * Currently not in use. File congestion control used for stream mode does 
     not restrict the parameters.**???**
   * `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
@@ -606,10 +610,9 @@ set to a value other than -1.
   write operation on a file. This is reported by a `UMSG_PEERERROR` message from 
   the peer, and the agent sets the appropriate flag internally. This flag 
   persists up to the moment when the connection is broken or closed.
-
 <br><br>
 
-#### srt_recv, srt_recvmsg, srt_recvmsg2
+### srt_recv, srt_recvmsg, srt_recvmsg2
 
 ```
 int srt_recv(SRTSOCKET u, char* buf, int len);
@@ -631,15 +634,18 @@ specific requirements:
 
 1. In **file/stream mode**, as many bytes as possible are retrieved (the minimum
 being the size of the given buffer or the size of the data currently available). 
-Any data that is available but not extracted this time will be available next time.
-2. In **file/message mode**, exactly one message is retrieved, with the boundaries
-defined at the moment of sending. If some parts of the messages are already
-retrieved, but not the whole message, nothing will be received (the function
-blocks or returns `SRT_EASYNCRCV`). If the message to be returned does not
-fit in the buffer, nothing will be received and the error is reported.
-3. In **live mode**, the function behaves as in file/message mode, although the 
-number of bytes retrieved will be at most the size of `SRTO_PAYLOADSIZE`. In this 
-mode, however, with default settings of `SRTO_TSBPDMODE` and `SRTO_TLPKTDROP`, 
+Any data that is available but not extracted this time will be available 
+next time.
+
+2. In **file/message mode**, exactly one message is retrieved, with the 
+boundaries defined at the moment of sending. If some parts of the messages are 
+already retrieved, but not the whole message, nothing will be received (the 
+function blocks or returns `SRT_EASYNCRCV`). If the message to be returned does 
+not fit in the buffer, nothing will be received and the error is reported.
+
+3. In **live mode**, the function behaves as in **file/message mode**, although 
+the number of bytes retrieved will be at most the size of `SRTO_PAYLOADSIZE`. In 
+this mode, however, with default settings of `SRTO_TSBPDMODE` and `SRTO_TLPKTDROP`, 
 the message will be received only when its time to play has come, and until then 
 it will be kept in the receiver buffer; also, when the time to play has come
 for a message that is next to the currently lost one, it will be delivered
@@ -657,10 +663,10 @@ and the lost one dropped.
   * `SRT_ECONNLOST`: Socket `u` used for the operation has lost connection
 (this is reported only if the connection was unexpectedly broken, not
 when it was closed by the foreign host).
-  * `SRT_EINVALMSGAPI`: Incorrect API usage in message mode:
-    * Live mode: size of the buffer is less than `SRTO_PAYLOADSIZE`
-  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in stream mode:
-    * Currently not in use. File congestion control used for stream mode 
+  * `SRT_EINVALMSGAPI`: Incorrect API usage in **message mode**:
+    * **live mode**: size of the buffer is less than `SRTO_PAYLOADSIZE`
+  * `SRT_EINVALBUFFERAPI`: Incorrect API usage in **stream mode**:
+    * Currently not in use. File congestion control used for **stream mode** 
      does not restrict the parameters. **???**
   * `SRT_ELARGEMSG`: Message to be sent can't fit in the sending buffer (that is,
 it exceeds the current total space in the sending buffer in bytes). This means
@@ -677,13 +683,12 @@ depends on the mode:
      possibly the first message ready with `inorder` = false
    * In **file/stream mode**, it is expected to have at least one byte of data 
    still not extracted
-* `SRT_ETIMEOUT`: The readiness condition described above is still not achieved 
+   * `SRT_ETIMEOUT`: The readiness condition described above is still not achieved 
 and the timeout has passed. This is only reported in blocking mode when
 `SRTO_RCVTIMEO` is set to a value other than -1.
-
 <br><br>
 
-#### srt_sendfile, srt_recvfile
+### srt_sendfile, srt_recvfile
 
 ```
 int64_t srt_sendfile(SRTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
@@ -714,6 +719,7 @@ You need to pass them to the `srt_sendfile` or `srt_recvfile` function if you
 don't know what value to chose.
 
 - Returns:
+
   * Size (\>0) of the transmitted data of a file. It may be less than `size`, if 
   the size was greater than the free space in the buffer, in which case you have 
   to send rest of the file next time.
@@ -725,7 +731,7 @@ don't know what value to chose.
   * `SRT_ECONNLOST`: Socket `u` used for the operation has lost its connection.
   * `SRT_EINVALBUFFERAPI`: When socket has `SRTO_MESSAGEAPI` = true or 
   `SRTO_TSBPDMODE` = true.
-(**BUG**: Looxlike MESSAGEAPI isn't checked)
+(**BUG?**: Looxlike MESSAGEAPI isn't checked)
   * `SRT_EINVRDOFF`: There is a mistake in `offset` or `size` parameters, which 
   should match the index availability and size of the bytes available since 
   `offset` index. This is actually reported for `srt_sendfile` when the `seekg` 
@@ -733,22 +739,20 @@ don't know what value to chose.
   * `SRT_EINVWROFF`: Like above, reported for `srt_recvfile` and `seekp`/`tellp`.
   * `SRT_ERDPERM`: The read from file operation has failed (`srt_sendfile`).
   * `SRT_EWRPERM`: The write to file operation has failed (`srt_recvfile`).
-
 <br><br>
 
 Diagnostics
 -----------
-#### srt_getlasterror_str
+### srt_getlasterror_str
 
 ```
 const char* srt_getlasterror_str(void);
 ```
 
 Get the text message for the last error.
-
 <br><br>
 
-#### srt_getlasterror
+### srt_getlasterror
 
 ```
 int srt_getlasterror(int* errno_loc);
@@ -757,10 +761,9 @@ int srt_getlasterror(int* errno_loc);
 Get the numeric code of the error. Additionally, `errno_loc` returns any POSIX 
 `errno` value that was associated with this error (0 if there was no
 system error). For Windows, this is the value returned by `GetLastError()`.
-
 <br><br>
 
-#### srt_strerror
+### srt_strerror
 ```
 const char* srt_strerror(int code, int errnoval);
 ```
@@ -771,10 +774,9 @@ Returns a string message that represents a given SRT error code and possibly the
 **NOTE:** *This function isn't thread safe. It uses a static variable to hold the 
 error description. There's no problem with using it in a multithreaded environment, 
 as long as only one thread in the whole application calls this function.* **???**
-
 <br><br>
 
-#### srt_clearlasterror
+### srt_clearlasterror
 
 ```
 void srt_clearlasterror(void);
@@ -782,12 +784,11 @@ void srt_clearlasterror(void);
 
 This function clears the last error. After this call, the `srt_getlasterror` will
 report a "successful" code.
-
 <br><br>
 
 Performance tracking
 --------------------
-#### srt_bstats, srt_bistats
+### srt_bstats, srt_bistats
 ```
 // perfmon with Byte counters for better bitrate estimation.
 int srt_bstats(SRTSOCKET u, SRT_TRACEBSTATS * perf, int clear);
@@ -818,21 +819,21 @@ packet will be sent immediately. The extra "wasted" time will be accounted for
 at the next sending.
 
 * `pktFlowWindow`: The amount of free space ("flow window" size) on the receiver, 
-as read on the sender based on the number of packets. **???** When this
-value drops to zero, the next packet sent will be dropped by the receiver
-without processing. In file mode this may cause a slowdown of sending in order
-to wait until the receiver makes more space available. **???**; in live mode the 
-receiver buffer contents should normally occupy not more than half of the buffer 
-size (default 8192). If this **???** size is less than this **???** half and 
-declines, it means that the receiver cannot process the incoming stream fast 
+as read on the sender based on the number of packets. **???** When this value 
+drops to zero, the next packet sent will be dropped by the receiver without 
+processing. In **file mode** this may cause a slowdown of sending in order to 
+wait until the receiver makes more space available. **???**; in **live mode** 
+the receiver buffer contents should normally occupy not more than half of the 
+buffer size (default 8192). If this **???** size is less than this **???** half 
+and declines, it means that the receiver cannot process the incoming stream fast 
 enough and this may lead to a dropped connection.
 
-* `pktCongestionWindow`: The "congestion window" in packets. In file mode this
-value starts at 16 and is increased with every number of reported
+* `pktCongestionWindow`: The "congestion window" in packets. In **file mode** 
+this value starts at 16 and is increased with every number of reported
 acknowledged packets, and then is also updated based on the receiver-reported
 delivery rate. It represents the maximum number of packets that can be safely
 sent now without causing congestion. The higher this value, the faster the
-packets can be sent. In live mode this field is not used.
+packets can be sent. In **live mode** this field is not used.
 
 * `pktFlightSize`: The number of packets in flight. This is the difference 
 between the packet sequence number that was last reported by an ACK message and 
@@ -876,14 +877,14 @@ scheduled for sending and possibly sent, but not yet acknowledged.
 * `msSndBuf`: Same as `pktSndBuf`, but expressed as a time interval between the
 oldest and the latest packet scheduled for sending.
 
-* `msSndTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for live mode), it returns
-the value of `SRTO_PEERLATENCY`, otherwise 0.
+* `msSndTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for **live mode**), it 
+returns the value of `SRTO_PEERLATENCY`, otherwise 0.
 
-* `pktRcvBuf`: Number of packets in the receiver buffer.  Note that in
-the Live mode (with turned on `SRTO_TSBPDMODE`, default) some packets must stay
-in the buffer and will not be signed off to the application until the "time to
-play" comes. In File mode it directly means that all that is above 0 can (and
-shall) be read right now.
+* `pktRcvBuf`: Number of packets in the receiver buffer. Note that in **live mode** 
+(with `SRTO_TSBPDMODE` turned on, default) some packets must stay in the buffer 
+and will not be signed off to the application until the "time to play" comes. 
+In **file mode** it means that all that is above 0 can (and shall) be read 
+right now.
 
 * `byteRcvBuf`: Like `pktRcvBuf`, in bytes.
 
@@ -891,9 +892,8 @@ shall) be read right now.
 receiver buffer. Note that this range includes all packets regardless of whether 
 they are ready to play or not.
 
-* `msRcvTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for live mode), it returns
-the value of `SRTO_RCVLATENCY`; otherwise 0.
-
+* `msRcvTsbPdDelay`: If `SRTO_TSBPDMODE` is on (default for **live mode**), it 
+returns the value of `SRTO_RCVLATENCY`; otherwise 0.
 <br><br>
 
 Asynchronous operations (epoll)
@@ -904,13 +904,12 @@ thread with having the blocking operation moved to epoll waiting so that it can
 block on multiple sockets at once. **???**
 
 The epoll system, similar to the one on Linux, relies on `eid` objects managed
-internally in SRT, which can be subscribed to particular sockets and the readiness
-status of particular operations. The `srt_epoll_wait` function can then be used
-to block until any readiness status in the whole `eid` is set.
-
+internally in SRT, which can be subscribed to particular sockets and the 
+readiness status of particular operations. The `srt_epoll_wait` function can 
+then be used to block until any readiness status in the whole `eid` is set.
 <br><br>
 
-#### srt_epoll_create
+### srt_epoll_create
 ```
 int srt_epoll_create(void);
 ```
@@ -918,17 +917,18 @@ int srt_epoll_create(void);
 Creates a new epoll container.
 
 - Returns:
+
   * valid EID on success
   * -1 on failure
 
 - Errors:
+
   * `SRT_ECONNSETUP`: System operation failed. This is on systems that use a 
 special method for the system part of epoll and therefore associated resources,
 like epoll on Linux.
-
 <br><br>
 
-#### srt_epoll_add_usock, srt_epoll_add_ssock, srt_epoll_update_usock, srt_epoll_update_ssock
+### srt_epoll_add_usock, srt_epoll_add_ssock, srt_epoll_update_usock, srt_epoll_update_ssock
 
 ```
 int srt_epoll_add_usock(int eid, SRTSOCKET u, const int* events);
@@ -956,20 +956,20 @@ remove any readiness status for flags that are no longer set.
 * `events`: points to a variable set to epoll flags, or NULL if
 you want to subscribe a socket for all possible events
 
-- Return: 
+- Returns:
+ 
   * 0 if successful, otherwise -1
 
 - Errors:
 
   * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 
-**BUG**: for `add_ssock` the system error results in an empty `CUDTException()`
+**BUG?**: for `add_ssock` the system error results in an empty `CUDTException()`
 call which actually results in `SRT_SUCCESS`. For cases like that the
 `SRT_ECONNSETUP` code is predicted.
-
 <br><br>
 
-#### srt_epoll_remove_usock, srt_epoll_remove_ssock
+### srt_epoll_remove_usock, srt_epoll_remove_ssock
 
 ```
 int srt_epoll_remove_usock(int eid, SRTSOCKET u);
@@ -982,16 +982,16 @@ states recorded for that socket.
 The `_usock` suffix refers to a user socket (SRT socket). 
 The `_ssock` suffix refers to a system socket.
 
-- Return: 
+- Returns:
+ 
   * 0 if successful, otherwise -1
 
 - Errors:
 
   * `SRT_EINVPOLLID`: `eid` designates no valid EID object
-
 <br><br>
 
-#### srt_epoll_wait
+### srt_epoll_wait
 ```
 int srt_epoll_wait(int eid, SRTSOCKET* readfds, int* rnum, SRTSOCKET* writefds, int* wnum, int64_t msTimeOut,
                         SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
@@ -1012,44 +1012,43 @@ it blocks indefinitely until a readiness state occurs.
 * `lwfds` and `lwnum`: Array to write system sockets that are read-ready (and its length)
 * `lwfds` and `lwnum`: Array to write system sockets that are write-ready (and its length)
 
-Note that there is no space here to return erroneous sockets. **???** If an error occurred
-on a socket then that socket is reported in both read-ready and write-ready arrays,
-regardless of what event types it was subscribed for. Usually then you subscribe
-given socket for only read readiness, for example (`SRT_EPOLL_IN`), but pass both
-arrays for read and write readiness. This socket will not be reported in the write
-readiness array even if it's write ready, but it will be reported there if the
-operation on this socket encountered an error.
+Note that there is no space here to return erroneous sockets. **???** If an error 
+occurred on a socket then that socket is reported in both read-ready and write-ready 
+arrays, regardless of what event types it was subscribed for. Usually then you 
+subscribe given socket for only read readiness, for example (`SRT_EPOLL_IN`), but 
+pass both arrays for read and write readiness. This socket will not be reported 
+in the write readiness array even if it's write ready, but it will be reported 
+there if the operation on this socket encountered an error.
 
-Return:
+- Returns:
 
-* The number (\>0) of ready sockets, of whatever kind (if any)
-* -1 in case of error
+  * The number (\>0) of ready sockets, of whatever kind (if any)
+  * -1 in case of error
 
-Errors:
+- Errors:
 
-* `SRT_EINVPOLLID`: `eid` designates no valid EID object
-* `SRT_ETIMEOUT`: Up to `msTimeOut` no sockets subscribed in `eid` were ready.
+  * `SRT_EINVPOLLID`: `eid` designates no valid EID object
+  * `SRT_ETIMEOUT`: Up to `msTimeOut` no sockets subscribed in `eid` were ready.
 This is reported only if `msTimeOut` was \>=0, otherwise the function waits
 indefinitely.
-
 <br><br>
 
-#### srt_epoll_release
+### srt_epoll_release
 ```
 int srt_epoll_release(int eid);
 ```
 
 Deletes the epoll container.
 
-Return:
+- Returns:
 
-* The number (\>0) of ready sockets, of whatever kind (if any)
-* -1 in case of error
+  * The number (\>0) of ready sockets, of whatever kind (if any)
+  * -1 in case of error
 
-Errors:
+- Errors:
 
-* `SRT_EINVPOLLID`: `eid` designates no valid EID object
 
+  * `SRT_EINVPOLLID`: `eid` designates no valid EID object
 <br><br>
 
 Logging control
@@ -1063,11 +1062,9 @@ entries up to the *Note* log level are displayed from all FAs.
 
 Logging can only be manipulated globally, with no regard to a specific 
 socket. This is because lots of operations in SRT are not dedicated to any 
-particular socket, and some are shared between sockets.
+particular socket, and some are shared between sockets.<br><br>
 
-<br><br>
-
-#### srt_setloglevel
+### srt_setloglevel
 
 ```
 void srt_setloglevel(int ll);
@@ -1084,11 +1081,9 @@ The constants for this value are those from `<sys/syslog.h>`
 * `LOG_NOTICE`: Occasionally displayed information
 * `LOG_WARNING`: Unusual behavior
 * `LOG_ERR`: Abnormal behavior
-* `LOG_CRIT`: Error that makes the current socket unusable
+* `LOG_CRIT`: Error that makes the current socket unusable<br><br>
 
-<br><br>
-
-#### srt_addlogfa, srt_dellogfa, srt_resetlogfa
+### srt_addlogfa, srt_dellogfa, srt_resetlogfa
 
 ```
 void srt_addlogfa(int fa);
@@ -1104,20 +1099,18 @@ very often.
 
 All FAs are turned on by default, except potentially dangerous ones
 (such as `SRT_LOGFA_HAICRYPT`).
-
 <br><br>
 
-#### srt_setloghandler
+### srt_setloghandler
 ```
 void srt_setloghandler(void* opaque, SRT_LOG_HANDLER_FN* handler);
 ```
 
 By default logs are printed to standard error stream. This function replaces
 the sending to a stream with a handler function that will receive them.
-
 <br><br>
 
-#### srt_setlogflags
+### srt_setlogflags
 ```
 void srt_setlogflags(int flags);
 ```
@@ -1132,7 +1125,6 @@ The following flags are collected in the `logging_api.h` public header:
 * `SRT_LOGF_DISABLE_THREADNAME`: Do not provide the thread name in the header
 * `SRT_LOGF_DISABLE_SEVERITY`: Do not provide severity information in the header
 * `SRT_LOGF_DISABLE_EOL`: Do not add the end-of-line character to the log line
-
 <br><br>
 
 [RETURN TO TOP OF PAGE](#SRT-API-Functions)
