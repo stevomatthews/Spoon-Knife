@@ -156,7 +156,7 @@ as `SRTO_REUSEADDR` is set to *true* (default).
   * `SRT_EINVOP`: Socket already bound
   * `SRT_EINVPARAM`: Address family in `name` is not one set for `srt_socket`
   * `SRT_ECONNSETUP`: Internal creation of a UDP socket failed 
-  * `SRT_ESOCKFAIL`: Internal configuring of a UDP socket (`bind`, `setsockopt`) failed
+  * `SRT_ESOCKFAIL`: Internal configuration of a UDP socket (`bind`, `setsockopt`) failed
 <br><br>
 
 ### srt_create_socket
