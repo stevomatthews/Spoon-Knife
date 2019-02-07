@@ -200,7 +200,7 @@ mode it's not possible because `srt_connect` does not return until the
 socket is connected or failed due to timeout or interrupted call.
 * `SRTS_CONNECTED`: The socket is connected and ready for transmission.
 * `SRTS_BROKEN`: The socket was connected, but the connection was broken
-* `SRTS_CLOSING`: The socket may still open and active, but closing
+* `SRTS_CLOSING`: The socket may still be open and active, but closing
 is requested, so no further operations will be accepted (active operations will 
 be completed before closing)
 * `SRTS_CLOSED`: The socket has been closed, but not yet removed by the GC
@@ -754,7 +754,7 @@ Diagnostics
 const char* srt_getlasterror_str(void);
 ```
 
-Get the text message for the last error.
+Get the text message for the last error. **???**
 <br><br>
 
 ### srt_getlasterror
@@ -844,7 +844,7 @@ packets can be sent. In **live mode** this field is not used.
 between the packet sequence number that was last reported by an ACK message and 
 the sequence number of the packet just sent. Note that ACKs are received
 periodically, so this value is most accurate just after receiving an ACK and
-becomes a little exaggerated over time until the next ACK arrives.
+becomes a little exaggerated over time until the next ACK arrives.  **???**
 
 * `msRTT`: The RTT (Round-Trip time) is the sum of two STT (Single-Trip time) 
 values, one from agent to peer, and one from peer to agent. Note that *the 
@@ -864,7 +864,7 @@ value decreases with data scheduled for sending by the application, and increase
 with every ACK received from the receiver, after the packets are sent over 
 the UDP link.
 
-* ` byteAvailRcvBuf`: The number of bytes available in the receiver buffer.
+* ` byteAvailRcvBuf`: The number of bytes available in the receiver buffer. **???**
 
 * `mbpsMaxBW`: The maximum bandwidth in Mb/s. Usually this is the setting from 
 the `SRTO_MAXBW` option, which may include the value 0 (unlimited). Under certain 
