@@ -49,7 +49,7 @@ SRT URI in the applications.
 SRT contains one built-in filter named "fec". This filter implements the FEC 
 mechanism, as described in SMPTE 2022-1-2007.
 
-![SRT Packet Filter Mechanism](images/packet-filter-mechanism.png =400x)
+![SRT Packet Filter Mechanism](images/packet-filter-mechanism.png = 400x)
 
 On the input side, filtering occurs at the moment when a packet is extracted 
 from the send buffer. A filter may alter the packet before inserting it into the 
