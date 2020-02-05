@@ -3,8 +3,8 @@ T E C H N I C A L   O V E R V I E W
 Secure Reliable Transport (SRT) Protocol
 ========================================
 
-**NOTE**: This document was originally converted (2020-02-05) from the 
-latest working version (2019-09-18) of the published draft:
+> **NOTE**: This document was originally converted (2020-02-05) from the 
+> latest working version (2019-09-18) of the published draft:
 
 https://github.com/Haivision/srt/files/2489142/SRT_Protocol_TechnicalOverview_DRAFT_2018-10-17.pdf
 
@@ -247,48 +247,48 @@ packets instead of newer.
 The initial development of SRT involved a number of changes and
 additions to UDT version 4, primarily:
 
-  - > Statistics counters in bytes
+  -  Statistics counters in bytes
 
-  - > Buffer sizes in milliseconds to control Latency (measuring buffers
-    > in time units is easier for configuring latency, and is
-    > independent of stream bitrate)
+  -  Buffer sizes in milliseconds to control Latency (measuring buffers
+     in time units is easier for configuring latency, and is
+     independent of stream bitrate)
 
-  - > Statistics in ACK messages (receive rate and estimated link
-    > capacity)
+  -  Statistics in ACK messages (receive rate and estimated link
+     capacity)
 
-  - > Control packet timestamps (this is in the UDT draft but not in the
-    > UDT4 implementation)
+  -  Control packet timestamps (this is in the UDT draft but not in the
+     UDT4 implementation)
 
-  - > Timestamp drift correction algorithm
+  -  Timestamp drift correction algorithm
 
-  - > Periodic NAK reports (UDT4 disabled this draft feature in favor of
-    > timeout retransmission of unACKed packets, which consumes too much
-    > bandwidth for real-time streaming applications).
+  -  Periodic NAK reports (UDT4 disabled this draft feature in favor of
+     timeout retransmission of unACKed packets, which consumes too much
+     bandwidth for real-time streaming applications).
 
-  - > Timestamp-Based Packet Delivery (configured latency)
+  -  Timestamp-Based Packet Delivery (configured latency)
 
-  - > SRT handshake based on UDT user-defined control packet for
-    > exchanging peer configuration and implementation information to
-    > ensure seamless upgrades while evolving the protocol, and to
-    > maintain backward compatibility
+  -  SRT handshake based on UDT user-defined control packet for
+     exchanging peer configuration and implementation information to
+     ensure seamless upgrades while evolving the protocol, and to
+     maintain backward compatibility
 
-  - > Maximum output rate based on configured value or measured input
-    > rate
+  -  Maximum output rate based on configured value or measured input
+     rate
 
-  - > Encryption:
+  -  Encryption:
     
-      - > Keying material generation from a passphrase
+      -  Keying material generation from a passphrase
     
-      - > Exchange of keying material and decryption status using a UDT
-        > user-defined control packet (sender knows if a receiver can
-        > properly decrypt stream)
+      -  Exchange of keying material and decryption status using a UDT
+         user-defined control packet (sender knows if a receiver can
+         properly decrypt stream)
     
-      - > AES-CTR encryption/decryption: reassign 2 bits in the data
-        > header‘s message number to specify the key (odd/even/none)
-        > used for encryption; similar to the DVB scrambling control
-        > field
+      -  AES-CTR encryption/decryption: reassign 2 bits in the data
+         header‘s message number to specify the key (odd/even/none)
+         used for encryption; similar to the DVB scrambling control
+         field
     
-      - > Ensure smooth key regeneration after CTR exhaustion
+      -  Ensure smooth key regeneration after CTR exhaustion
 
 Early development of SRT was conducted using hardware encoders and
 decoders (Makito X series from Haivision) on internal networks, where
@@ -324,13 +324,13 @@ Every UDP packet carrying SRT traffic contains an SRT header
 (immediately after the UDP header). In all versions, the SRT header
 contains four major 32-bit fields:
 
-  - > PH\_SEQNO
+  -  PH\_SEQNO
 
-  - > PH\_MSGNO
+  -  PH\_MSGNO
 
-  - > PH\_TIMESTAMP
+  -  PH\_TIMESTAMP
 
-  - > PH\_ID
+  -  PH\_ID
 
 SRT has two kinds of packets, where the first bit in the PH\_SEQNO field
 in the packet header distinguishes between data (0) and control (1)
@@ -351,46 +351,46 @@ Blue = *SRT 1.1 changes*
 Green = *SRT 1.2 changes*
 Purple = *SRT 1.3 changes*
 
-  - > **FF** = (2 bits) Position of packet in message, where:
+  -  **FF** = (2 bits) Position of packet in message, where:
     
-      - > 10b = 1st
+      -  10b = 1st
     
-      - > 00b = middle
+      -  00b = middle
     
-      - > 01b = last
+      -  01b = last
     
-      - > 11b = single
+      -  11b = single
 
-  - > **O** = (1 bit) Indicates whether the message should be delivered
-    > in order (1) or not (0). In File/Message mode (original UDT with
-    > UDT\_DGRAM) when this bit is clear then a message that is sent
-    > later (but reassembled before an earlier message which may be
-    > incomplete due to packet loss) is allowed to be delivered
-    > immediately, without waiting for the earlier message to be
-    > completed. This is not used in Live mode because there‘s a
-    > completely different function used for data extraction when TSBPD
-    > mode is on.
+  -  **O** = (1 bit) Indicates whether the message should be delivered
+     in order (1) or not (0). In File/Message mode (original UDT with
+     UDT\_DGRAM) when this bit is clear then a message that is sent
+     later (but reassembled before an earlier message which may be
+     incomplete due to packet loss) is allowed to be delivered
+     immediately, without waiting for the earlier message to be
+     completed. This is not used in Live mode because there‘s a
+     completely different function used for data extraction when TSBPD
+     mode is on.
 
-  - > **KK** = (2 bits) Indicates whether or not data is encrypted:
+  -  **KK** = (2 bits) Indicates whether or not data is encrypted:
     
-      - > 00b: not encrypted
+      -  00b: not encrypted
     
-      - > 01b: encrypted with even key
+      -  01b: encrypted with even key
     
-      - > 10b: encrypted with odd key
+      -  10b: encrypted with odd key
 
-  - > **R** = (1 bit) Retransmitted packet. This flag is clear (0) when
-    > a packet is transmitted the very first time, and is set (1) if the
-    > packet is retransmitted.
+  -  **R** = (1 bit) Retransmitted packet. This flag is clear (0) when
+     a packet is transmitted the very first time, and is set (1) if the
+     packet is retransmitted.
 
 In Data packets, the third and fourth fields are interpreted as follows:
 
-  - > TIMESTAMP: Usually the time when a packet was sent, although the
-    > real interpretation may vary depending on the type.
+  -  TIMESTAMP: Usually the time when a packet was sent, although the
+     real interpretation may vary depending on the type.
 
-  - > ID: The Destination Socket ID to which a packet should be
-    > dispatched, although it may have the special value 0 when the
-    > packet is a connection request
+  -  ID: The Destination Socket ID to which a packet should be
+     dispatched, although it may have the special value 0 when the
+     packet is a connection request
 
 Additional details for Data packets are discussed later in this
 document.
@@ -403,13 +403,13 @@ following structure (UDP header not shown):
 For Control packets the first two fields are interpreted respectively
 (using network bit order) as:
 
-  - > Word 0:
+  -  Word 0:
     
-      - > Bit 0: packet type (set to 1 for control packet)
+      -  Bit 0: packet type (set to 1 for control packet)
     
-      - > Bits 1-15: Message Type
+      -  Bits 1-15: Message Type
     
-      - > Bits 16-31: Message Extended type
+      -  Bits 16-31: Message Extended type
 
 | **Type** | **Extended Type** | **Description**                                 |
 | -------- | ----------------- | ----------------------------------------------- |
@@ -432,11 +432,11 @@ The Extended Message mechanism is theoretically open for further
 extensions. SRT uses some of them for its own purposes. This will be
 referred to later in the section on the SRT Extended Handshake.
 
-  - > Word 1:
+  -  Word 1:
     
-      - > Additional info — used in some control messages as extra space
-        > for data. Its interpretation depends on the particular message
-        > type. Handshake messages don‘t use it.
+      -  Additional info — used in some control messages as extra space
+         for data. Its interpretation depends on the particular message
+         type. Handshake messages don‘t use it.
 
 ##   
 
@@ -2162,34 +2162,34 @@ sending data as well as special control packets, also referred to as
 
 An SRT connection is characterized by the fact that it is:
 
-  - > first engaged by a *handshake* process
+  -  first engaged by a *handshake* process
 
-  - > maintained as long as any packets are being exchanged in a timely
-    > manner
+  -  maintained as long as any packets are being exchanged in a timely
+     manner
 
-  - > considered closed when a party receives the appropriate close
-    > command from its peer (connection closed by the foreign host), or
-    > when it receives no packets at all for some predefined time
-    > (connection broken on timeout).
+  -  considered closed when a party receives the appropriate close
+     command from its peer (connection closed by the foreign host), or
+     when it receives no packets at all for some predefined time
+     (connection broken on timeout).
 
 Just like its predecessor UDT, SRT supports two connection
 configurations:
 
-1.  > Caller-Listener, where one side waits for the other to initiate a
-    > connection
+1.   Caller-Listener, where one side waits for the other to initiate a
+     connection
 
-2.  > Rendezvous, where both sides attempt to initiate a connection
+2.   Rendezvous, where both sides attempt to initiate a connection
 
 As SRT development has evolved, two handshaking mechanisms have emerged:
 
-1.  > the legacy UDT handshake, with the “SRT” part of the handshake
-    > implemented as extended control messages; this is the only
-    > mechanism in SRT versions 1.2 and lower, and is known as HSv4
-    > (where the number 4 refers to the last UDT version)
+1.   the legacy UDT handshake, with the “SRT” part of the handshake
+     implemented as extended control messages; this is the only
+     mechanism in SRT versions 1.2 and lower, and is known as HSv4
+     (where the number 4 refers to the last UDT version)
 
-2.  > the new integrated handshake, known as HSv5, where all the
-    > required information concerning the connection is interchanged
-    > completely in the handshake process
+2.   the new integrated handshake, known as HSv5, where all the
+     required information concerning the connection is interchanged
+     completely in the handshake process
 
 The version compatibility requirements are such that if one side of the
 connection only understands HSv4, the connection is made according to
@@ -2206,16 +2206,16 @@ srt\_setsockflag(s, SRTO\_MINVERSION, \&req\_version, sizeof(int));
 
 **IMPORTANT**: An SRT application must do either of these two things:
 
-  - > be HSv4 compatible; in this case it must:
+  -  be HSv4 compatible; in this case it must:
     
-      - > NOT use any new features in 1.3.0 or higher (such as
-        > bidirectional transmission or Stream ID)
+      -  NOT use any new features in 1.3.0 or higher (such as
+         bidirectional transmission or Stream ID)
     
-      - > ALWAYS set SRTO\_SENDER to true on the sender side
+      -  ALWAYS set SRTO\_SENDER to true on the sender side
 
-  - > require HSv5; if so, it must prevent connections to any older
-    > versions of SRT by setting the minimum version 1.3.0 as shown
-    > above.
+  -  require HSv5; if so, it must prevent connections to any older
+     versions of SRT by setting the minimum version 1.3.0 as shown
+     above.
 
 ### Handshake Structure
 
@@ -2249,31 +2249,31 @@ Handshakes section for details):
 
 The HSv4 (UDT-legacy based) handshake is based on two rules:
 
-1.  > The complete handshake process, which establishes the connection,
-    > is the same as the UDT handshake.
+1.   The complete handshake process, which establishes the connection,
+     is the same as the UDT handshake.
 
-2.  > The required SRT data interchange is done after the connection is
-    > established using SRT Extended Message with the following Extended
-    > Types:
+2.   The required SRT data interchange is done after the connection is
+     established using SRT Extended Message with the following Extended
+     Types:
     
-      - > SRT\_CMD\_HSREQ/SRT\_CMD\_HSRSP, which exchange special SRT
-        > flags as well as a latency value
+      -  SRT\_CMD\_HSREQ/SRT\_CMD\_HSRSP, which exchange special SRT
+         flags as well as a latency value
     
-      - > SRT\_CMD\_KMREQ/SRT\_CMD\_KMRSP (optional), which exchange the
-        > wrapped stream encryption key used with encryption (KMRSP is
-        > used only for confirmation or error reporting)
+      -  SRT\_CMD\_KMREQ/SRT\_CMD\_KMRSP (optional), which exchange the
+         wrapped stream encryption key used with encryption (KMRSP is
+         used only for confirmation or error reporting)
 
 **IMPORTANT**: *There are two rules in the UDT code that continue to
 apply to SRT version 1.2.0 and earlier, and therefore affect the
 prerequisites for any future versions of the protocol:*
 
-1.  > *The initial handshake response message coming from the Listener
-    > side DOES NOT REWRITE the Version field (it‘s simply blindly
-    > copied from the handshake request message received).*
+1.   *The initial handshake response message coming from the Listener
+     side DOES NOT REWRITE the Version field (it‘s simply blindly
+     copied from the handshake request message received).*
 
-2.  > *The size of the handshake message must be exactly equal to the
-    > legacy UDT handshake structure, otherwise the message is silently
-    > rejected.*
+2.   *The size of the handshake message must be exactly equal to the
+     legacy UDT handshake structure, otherwise the message is silently
+     rejected.*
 
 As of SRT version 1.3.0 with HSv5 the handshake must only satisfy the
 minimum size. However, the code cannot rely on this until each peer is
@@ -2282,9 +2282,9 @@ certain about the SRT version of the other.
 Even in HSv5, the Caller must first set two fields in the initial
 handshake message:
 
-  - > Version = 4
+  -  Version = 4
 
-  - > Type = UDT\_DGRAM
+  -  Type = UDT\_DGRAM
 
 The version recognition relies on the fact that the Listener returns a
 version of 5 (or potentially higher) if it is capable, but the Caller
@@ -2292,19 +2292,19 @@ must set the Version to 4 to make sure that the Listener copies this
 value, which is how an HSv4 caller is recognized. This allows SRT to
 handle the following combinations:
 
-1.  > HSv5 Caller vs. HSv4 Listener: The Listener returns version 4 to
-    > the Caller, so the Caller knows it should use HSv4, and then
-    > continues the handshake the old way.
+1.   HSv5 Caller vs. HSv4 Listener: The Listener returns version 4 to
+     the Caller, so the Caller knows it should use HSv4, and then
+     continues the handshake the old way.
 
-2.  > HSv4 Caller vs. HSv5 Listener: The Caller sends version 4 and the
-    > Listener returns version 5. The Caller ignores this value,
-    > however, and sends the second phase of the handshake still using
-    > version 4. This is how the Listener recognizes the HSv4 client.
+2.   HSv4 Caller vs. HSv5 Listener: The Caller sends version 4 and the
+     Listener returns version 5. The Caller ignores this value,
+     however, and sends the second phase of the handshake still using
+     version 4. This is how the Listener recognizes the HSv4 client.
 
-3.  > Both HSv5: The Listener responds with version 5 (or potentially
-    > higher in future) and the HSv5 Caller recognizes this value as
-    > HSv5 (or higher). The Caller then initiates the second phase of
-    > the handshake according to HSv5 rules.
+3.   Both HSv5: The Listener responds with version 5 (or potentially
+     higher in future) and the HSv5 Caller recognizes this value as
+     HSv5 (or higher). The Caller then initiates the second phase of
+     the handshake according to HSv5 rules.
 
 With Rendezvous there‘s no problem because both sides try to connect to
 one another, so there‘s no copying of the handshake data. Each side
@@ -2337,31 +2337,31 @@ the connection is established.
 The addition of a new handshake mechanism necessitates the introduction
 of two new roles, “Initiator” and “Responder”:
 
-  - > *Initiator:* Starts the extended SRT handshake process and sends
-    > appropriate SRT extended handshake requests
+  -  *Initiator:* Starts the extended SRT handshake process and sends
+     appropriate SRT extended handshake requests
 
-  - > *Responder:* Expects the SRT extended handshake requests to be
-    > sent by the Initiator and sends SRT extended handshake responses
-    > back
+  -  *Responder:* Expects the SRT extended handshake requests to be
+     sent by the Initiator and sends SRT extended handshake responses
+     back
 
 There are two basic types of SRT handshake extensions that are exchanged
 in both handshake versions (HSv5 introduces some more extensions):
 
-  - > SRT\_CMD\_HSREQ: Exchanges the basic SRT information
+  -  SRT\_CMD\_HSREQ: Exchanges the basic SRT information
 
-  - > SRT\_CMD\_KMREQ: Exchanges the wrapped stream encryption key (used
-    > only if encryption is requested)
+  -  SRT\_CMD\_KMREQ: Exchanges the wrapped stream encryption key (used
+     only if encryption is requested)
 
 The Initiator and Responder roles are assigned differently in *HSv4* and
 *HSv5*.
 
 For an *HSv4* handshake the assignments are simple:
 
-  - > Initiator is the sender, which is the party that has set the
-    > SRTO\_SENDER socket option to *true*.
+  -  Initiator is the sender, which is the party that has set the
+     SRTO\_SENDER socket option to *true*.
 
-  - > Responder is the receiver, which is the party that has set
-    > SRTO\_SENDER to *false* (default).
+  -  Responder is the receiver, which is the party that has set
+     SRTO\_SENDER to *false* (default).
 
 Note that these roles are independent of the connection mode
 (Caller/Listener/Rendezvous), and that the behavior is undefined if
@@ -2369,18 +2369,18 @@ SRTO\_SENDER has the same value on both parties.
 
 For an *HSv5* handshake, the roles are dependent of the connection mode:
 
-  - > For Caller-Listener connections:
+  -  For Caller-Listener connections:
     
-      - > the Caller is the Initiator
+      -  the Caller is the Initiator
     
-      - > the Listener is the Responder
+      -  the Listener is the Responder
 
-  - > For Rendezvous connections:
+  -  For Rendezvous connections:
     
-      - > The Initiator and Responder roles are assigned based on the
-        > initial data interchange during the handshake (see
-        > [<span class="underline">The Rendezvous
-        > Handshake</span>](#_jm2aioq6cifh) below)
+      -  The Initiator and Responder roles are assigned based on the
+         initial data interchange during the handshake (see
+         [<span class="underline">The Rendezvous
+         Handshake</span>](#_jm2aioq6cifh) below)
 
 Note that if the handshake can be done as HSv5, the connection is always
 considered bidirectional and the SRTO\_SENDER flag is unused.
@@ -2390,29 +2390,29 @@ considered bidirectional and the SRTO\_SENDER flag is unused.
 The ReqType field in the Handshake Structure (see above) indicates the
 handshake message type.
 
-  - > Caller-Listener Request Types:
+  -  Caller-Listener Request Types:
     
-    1.  > Caller to Listener: INDUCTION(1)
+    1.   Caller to Listener: INDUCTION(1)
     
-    2.  > Listener to Caller: INDUCTION(1): reports cookie
+    2.   Listener to Caller: INDUCTION(1): reports cookie
     
-    3.  > Caller to Listener: CONCLUSION(-1): uses previously returned
-        > cookie
+    3.   Caller to Listener: CONCLUSION(-1): uses previously returned
+         cookie
     
-    4.  > Listener to Caller: CONCLUSION(-1): confirms connection
-        > established
+    4.   Listener to Caller: CONCLUSION(-1): confirms connection
+         established
 
 <!-- end list -->
 
-  - > Rendezvous Request Types:
+  -  Rendezvous Request Types:
     
-    1.  > After starting the connection: WAVEAHAND(0)
+    1.   After starting the connection: WAVEAHAND(0)
     
-    2.  > After receiving the above message from the peer:
-        > CONCLUSION(-1)
+    2.   After receiving the above message from the peer:
+         CONCLUSION(-1)
     
-    3.  > After receiving the above message from the peer:
-        > AGREEMENT(-2).
+    3.   After receiving the above message from the peer:
+         AGREEMENT(-2).
 
 Note that the Rendezvous process is different in HSv4 and HSv5, as the
 latter is based on a state machine.
@@ -2424,11 +2424,11 @@ the legacy UDT “socket type”, of which there are two: STREAM(1) and
 DGRAM(2). In SRT only UDT\_DGRAM is allowed. This legacy interpretation
 is applied in the following circumstances:
 
-  - > in an INDUCTION message sent initially by the Caller
+  -  in an INDUCTION message sent initially by the Caller
 
-  - > in an INDUCTION message sent back by the HSv4 Listener
+  -  in an INDUCTION message sent back by the HSv4 Listener
 
-  - > in a CONCLUSION message, if the other party was detected as HSv4
+  -  in a CONCLUSION message, if the other party was detected as HSv4
 
 For more information on Induction and Conclusion see the Caller-Listener
 Handshake section below.
@@ -2442,32 +2442,32 @@ field in cases where the message is going to be sent to an HSv4 party
 In all other cases Type follows the HSv5 interpretation and consists of
 the following:
 
-  - > an upper 16-bit field (0 - 15) reserved for encryption flags
+  -  an upper 16-bit field (0 - 15) reserved for encryption flags
 
-  - > a lower 16-bit field (16 - 31) reserved for extension flags
+  -  a lower 16-bit field (16 - 31) reserved for extension flags
 
 The extension flags field should have the following value:
 
-  - > in a CONCLUSION message, it should contain a combination of
-    > extension flags (with the HS\_EXT\_ prefix)
+  -  in a CONCLUSION message, it should contain a combination of
+     extension flags (with the HS\_EXT\_ prefix)
 
-  - > in an INDUCTION message sent back by the Listener it should
-    > contain SrtHSRequest::SRT\_MAGIC\_CODE (0x4A17)
+  -  in an INDUCTION message sent back by the Listener it should
+     contain SrtHSRequest::SRT\_MAGIC\_CODE (0x4A17)
 
-  - > in all other cases it should be 0.
+  -  in all other cases it should be 0.
 
 The encryption flags currently occupy only 3 out of 16 bits, which are
 used to advertise a value for PBKEYLEN (packet based key length). This
 value is taken from the SRTO\_PBKEYLEN option, divided by 8, giving
 possible values of:
 
-  - > 2 (AES-128)
+  -  2 (AES-128)
 
-  - > 3 (AES-192)
+  -  3 (AES-192)
 
-  - > 4 (AES-256)
+  -  4 (AES-256)
 
-  - > 0 (PBKEYLEN not advertised)
+  -  0 (PBKEYLEN not advertised)
 
 The PBKEYLEN advertisement is required due to the fact that while the
 Sender should decide the PBKEYLEN, in HSv5 the Sender might be the
@@ -2500,15 +2500,15 @@ two phases: *induction* and *conclusion*.
 The Caller begins by sending an “induction” message, which contains the
 following (significant) fields:
 
-  - > Version: must always be 4
+  -  Version: must always be 4
 
-  - > Type: UDT\_DGRAM (2)
+  -  Type: UDT\_DGRAM (2)
 
-  - > ReqType: URQ\_INDUCTION
+  -  ReqType: URQ\_INDUCTION
 
-  - > ID: Socket ID of the Caller
+  -  ID: Socket ID of the Caller
 
-  - > Cookie: 0
+  -  Cookie: 0
 
 The Destination Socket ID (in the SRT header) in this message is 0,
 which is interpreted as a connection request.
@@ -2520,27 +2520,27 @@ commands.*
 
 An HSv4 Listener responds with exactly the same values, except:
 
-  - > ID: Socket ID of the HSv4 Listener
+  -  ID: Socket ID of the HSv4 Listener
 
-  - > SYN Cookie: a cookie that is crafted based on host, port and
-    > current time  
-    > with 1 minute accuracy
+  -  SYN Cookie: a cookie that is crafted based on host, port and
+     current time  
+     with 1 minute accuracy
 
 An HSv5 Listener responds with the following:
 
-  - > Version: 5
+  -  Version: 5
 
-  - > Type: Extension Field (lower 16 bits):
-    > SrtHSRequest::SRT\_MAGIC\_CODE  
-    > Encryption Field (upper 16 bits): Advertised PBKEYLEN
+  -  Type: Extension Field (lower 16 bits):
+     SrtHSRequest::SRT\_MAGIC\_CODE  
+     Encryption Field (upper 16 bits): Advertised PBKEYLEN
 
-  - > ReqType: (UDT Connection Type) URQ\_INDUCTION
+  -  ReqType: (UDT Connection Type) URQ\_INDUCTION
 
-  - > ID: Socket ID of the HSv5 Listener
+  -  ID: Socket ID of the HSv5 Listener
 
-  - > SYN Cookie: a cookie that is crafted based on host, port and
-    > current time  
-    > with 1 minute accuracy
+  -  SYN Cookie: a cookie that is crafted based on host, port and
+     current time  
+     with 1 minute accuracy
 
 **NOTE**: *The HSv5 Listener still doesn‘t know the version of the
 Caller, and it responds with the same set of values regardless of
@@ -2548,29 +2548,29 @@ whether the Caller is version 4 or 5.*
 
 The important differences between HSv4 and HSv5 in this respect are:
 
-1.  > The HSv4 party completely ignores the values reported in Version
-    > and Type. It is, however, interested in the Cookie value, as this
-    > must be passed to the next phase. It does interpret these fields,
-    > but only in the “conclusion” message.
+1.   The HSv4 party completely ignores the values reported in Version
+     and Type. It is, however, interested in the Cookie value, as this
+     must be passed to the next phase. It does interpret these fields,
+     but only in the “conclusion” message.
 
-2.  > The HSv5 party does interpret the values in Version and Type. If
-    > it receives the value 5 in Version, it understands that it comes
-    > from an HSv5 party, so it knows that it should prepare the proper
-    > HSv5 messages in the next phase. It also checks the following in
-    > the Type field:
+2.   The HSv5 party does interpret the values in Version and Type. If
+     it receives the value 5 in Version, it understands that it comes
+     from an HSv5 party, so it knows that it should prepare the proper
+     HSv5 messages in the next phase. It also checks the following in
+     the Type field:
     
-      - > whether the lower 16-bit field (extension flags) contains the
-        > magic value (see the [<span class="underline">Type
-        > Field</span>](#_2t1nw0yacl3m) section above); otherwise the
-        > connection is rejected. This is a contingency for the case
-        > where someone who, in attempting to extend UDT independently,
-        > increases the Version value to 5 and tries to test it against
-        > SRT.
+      -  whether the lower 16-bit field (extension flags) contains the
+         magic value (see the [<span class="underline">Type
+         Field</span>](#_2t1nw0yacl3m) section above); otherwise the
+         connection is rejected. This is a contingency for the case
+         where someone who, in attempting to extend UDT independently,
+         increases the Version value to 5 and tries to test it against
+         SRT.
     
-      - > whether the upper 16-bit field (encryption flags) contain a
-        > non-zero value, which is interpreted as an advertised PBKEYLEN
-        > (in which case it is written into the value of the
-        > SRTO\_PBKEYLEN option).
+      -  whether the upper 16-bit field (encryption flags) contain a
+         non-zero value, which is interpreted as an advertised PBKEYLEN
+         (in which case it is written into the value of the
+         SRTO\_PBKEYLEN option).
 
 **The Conclusion Phase**
 
@@ -2581,28 +2581,28 @@ The following values are set by an HSv4 Caller. Note that the same
 values must be used by an HSv5 Caller when the Listener has returned
 Version 4 in its URQ\_INDUCTION response:
 
-  - > Version: 4
+  -  Version: 4
 
-  - > Type: UDT\_DGRAM (SRT must have this legacy UDT socket type only)
+  -  Type: UDT\_DGRAM (SRT must have this legacy UDT socket type only)
 
-  - > ReqType: URQ\_CONCLUSION
+  -  ReqType: URQ\_CONCLUSION
 
-  - > ID: Socket ID of the Caller
+  -  ID: Socket ID of the Caller
 
-  - > Cookie: the cookie previously received in the induction phase
+  -  Cookie: the cookie previously received in the induction phase
 
 If an HSv5 Caller receives a confirmation from a Listener that it can
 use the version 5 handshake, it fills in the following values:
 
-  - > Version: 5
+  -  Version: 5
 
-  - > Type: appropriate Extension Flags and Encryption Flags (see below)
+  -  Type: appropriate Extension Flags and Encryption Flags (see below)
 
-  - > ReqType: URQ\_CONCLUSION
+  -  ReqType: URQ\_CONCLUSION
 
-  - > ID: Socket ID of the Caller
+  -  ID: Socket ID of the Caller
 
-  - > Cookie: the cookie previously received in the induction phase
+  -  Cookie: the cookie previously received in the induction phase
 
 The Destination Socket ID (in the SRT header, PH\_ID field) in this
 message is the socket ID that was previously received in the induction
@@ -2610,11 +2610,11 @@ phase in the ID field in the handshake structure.
 
 The Type field contains:
 
-  - > Encryption Flags: advertised PBKEYLEN (see above)
+  -  Encryption Flags: advertised PBKEYLEN (see above)
 
-  - > Extension Flags: The HS\_EXT\_ prefixed flags defined in
-    > CHandShake  
-    > (see the [SRT Extended Handshake](#_rtjltioug2mc) section below)
+  -  Extension Flags: The HS\_EXT\_ prefixed flags defined in
+     CHandShake  
+     (see the [SRT Extended Handshake](#_rtjltioug2mc) section below)
 
 The Listener responds with the same values shown above, without the
 cookie (which isn‘t needed here), as well as the extensions for HSv5
@@ -2648,15 +2648,15 @@ into account.
 Initially, each party sends an SRT control message of type
 UMSG\_HANDSHAKE to the other, with the following fields:
 
-  - > Version: 4 (HSv4 only)
+  -  Version: 4 (HSv4 only)
 
-  - > Type: UDT\_DGRAM (HSv4 only)
+  -  Type: UDT\_DGRAM (HSv4 only)
 
-  - > ReqType: URQ\_WAVEAHAND
+  -  ReqType: URQ\_WAVEAHAND
 
-  - > ID: Socket ID of the party sending this message
+  -  ID: Socket ID of the party sending this message
 
-  - > Cookie: 0
+  -  Cookie: 0
 
 When the srt\_connect() function is first called by an application, each
 party sends this message to its peer, and then tries to read a packet
@@ -2664,15 +2664,15 @@ from its underlying UDP socket to see if the other party is alive. Upon
 reception of anUMSG\_HANDSHAKE message, each party initiates the second
 (conclusion) phase by sending this message:
 
-  - > Version: 4
+  -  Version: 4
 
-  - > Type: UDT\_DGRAM
+  -  Type: UDT\_DGRAM
 
-  - > ReqType: URQ\_CONCLUSION
+  -  ReqType: URQ\_CONCLUSION
 
-  - > ID: Socket ID of the party sending this message
+  -  ID: Socket ID of the party sending this message
 
-  - > Cookie: 0
+  -  Cookie: 0
 
 At this point, they are considered to be connected. When either party
 receives this message from its peer again, it sends another message with
@@ -2737,56 +2737,56 @@ her.
 This process can be described easily as a series of exchanges between
 the first and following parties (Alice and Bob, respectively):
 
-1.  > Initially, both parties are in the *waving* state. Alice sends a
-    > handshake message to Bob:
+1.   Initially, both parties are in the *waving* state. Alice sends a
+     handshake message to Bob:
     
-      - > Version: 5
+      -  Version: 5
     
-      - > Type: Extension field: 0  
-        > Encryption field: advertised PBKEYLEN
+      -  Type: Extension field: 0  
+         Encryption field: advertised PBKEYLEN
     
-      - > ReqType: URQ\_WAVEAHAND
+      -  ReqType: URQ\_WAVEAHAND
     
-      - > ID: Alice‘s socket ID
+      -  ID: Alice‘s socket ID
     
-      - > Cookie: Created based on host/port and current time
+      -  Cookie: Created based on host/port and current time
 
 > Keep in mind that while Alice doesn‘t yet know if she is sending this
 > message to an HSv4 or HSv5 peer, the values from these fields would
 > not be interpreted by an HSv4 peer when the ReqType is URQ\_WAVEAHAND.
 
-2.  > Bob receives Alice‘s URQ\_WAVEAHAND message, switches to the
-    > *attention* state. Since Bob now knows Alice‘s cookie, he performs
-    > a “cookie contest” (compares both cookie values). If Bob‘s cookie
-    > is greater than Alice‘s, he will become the Initiator. Otherwise,
-    > he will become the Responder.
+2.   Bob receives Alice‘s URQ\_WAVEAHAND message, switches to the
+     *attention* state. Since Bob now knows Alice‘s cookie, he performs
+     a “cookie contest” (compares both cookie values). If Bob‘s cookie
+     is greater than Alice‘s, he will become the Initiator. Otherwise,
+     he will become the Responder.
 
 > **IMPORTANT**: *The resolution of the Handshake Role (Initiator or
 > Responder) is essential to further processing.*
 
-3.  > Then Bob responds:
+3.   Then Bob responds:
     
-      - > Version: 5
+      -  Version: 5
     
-      - > Type: Extension field: appropriate flags if Initiator,
-        > otherwise 0  
-        > Encryption field: advertised PBKEYLEN
+      -  Type: Extension field: appropriate flags if Initiator,
+         otherwise 0  
+         Encryption field: advertised PBKEYLEN
     
-      - > ReqType: URQ\_CONCLUSION
+      -  ReqType: URQ\_CONCLUSION
 
 > **NOTE**: *If Bob is the Initiator and encryption is on, he will use
 > either his own PBKEYLEN or the one received from Alice (if she has
 > advertised PBKEYLEN).*
 
-4.  > Alice receives Bob‘s URQ\_CONCLUSION message. While at this point
-    > she also performs the “cookie contest”, the outcome will be the
-    > same. She switches to the *fine* state, and sends:
+4.   Alice receives Bob‘s URQ\_CONCLUSION message. While at this point
+     she also performs the “cookie contest”, the outcome will be the
+     same. She switches to the *fine* state, and sends:
     
-      - > Version: 5
+      -  Version: 5
     
-      - > Type: Appropriate extension flags and encryption flags
+      -  Type: Appropriate extension flags and encryption flags
     
-      - > ReqType: URQ\_CONCLUSION
+      -  ReqType: URQ\_CONCLUSION
 
 > **NOTE**: *Both parties always send extension flags at this point,
 > which will contain SRT\_CMD\_HSREQ if the message comes from an
@@ -2796,48 +2796,48 @@ the first and following parties (Alice and Bob, respectively):
 > the Type field), it will be used as the key length for key generation
 > sent next in the SRT\_CMD\_KMREQ block.*
 
-5.  > Bob receives Alice‘s URQ\_CONCLUSION message, and then does one of
-    > the following (depending on Bob‘s role):
+5.   Bob receives Alice‘s URQ\_CONCLUSION message, and then does one of
+     the following (depending on Bob‘s role):
     
-      - > If Bob is the Initiator (Alice‘s message contains
-        > SRT\_CMD\_HSRSP), he:
+      -  If Bob is the Initiator (Alice‘s message contains
+         SRT\_CMD\_HSRSP), he:
         
-          - > switches to the *connected* state
+          -  switches to the *connected* state
         
-          - > sends Alice a message with ReqType = URQ\_AGREEMENT, but
-            > containing no SRT extensions (*Extension flags*in Type
-            > should be 0)
+          -  sends Alice a message with ReqType = URQ\_AGREEMENT, but
+             containing no SRT extensions (*Extension flags*in Type
+             should be 0)
     
-      - > If Bob is the Responder (Alice‘s message contains
-        > SRT\_CMD\_HSREQ), he:
+      -  If Bob is the Responder (Alice‘s message contains
+         SRT\_CMD\_HSREQ), he:
         
-          - > switches to *initiated* state
+          -  switches to *initiated* state
         
-          - > sends Alice a message with ReqType = URQ\_CONCLUSION that
-            > also contains extensions with SRT\_CMD\_HSRSP
+          -  sends Alice a message with ReqType = URQ\_CONCLUSION that
+             also contains extensions with SRT\_CMD\_HSRSP
         
-          - > awaits a confirmation from Alice that she is also
-            > connected (preferably by URQ\_AGREEMENT message)
+          -  awaits a confirmation from Alice that she is also
+             connected (preferably by URQ\_AGREEMENT message)
 
-6.  > Alice receives the above message, enters into the *connected*
-    > state, and then does one of the following (depending on Alice‘s
-    > role):
+6.   Alice receives the above message, enters into the *connected*
+     state, and then does one of the following (depending on Alice‘s
+     role):
     
-      - > If Alice is the Initiator (received URQ\_CONCLUSION with
-        > SRT\_CMD\_HSRSP), she sends Bob a message with ReqType=
-        > URQ\_AGREEMENT.
+      -  If Alice is the Initiator (received URQ\_CONCLUSION with
+         SRT\_CMD\_HSRSP), she sends Bob a message with ReqType=
+         URQ\_AGREEMENT.
     
-      - > If Alice is the Responder, the received message has ReqType =
-        > URQ\_AGREEMENT and in response she does nothing.
+      -  If Alice is the Responder, the received message has ReqType =
+         URQ\_AGREEMENT and in response she does nothing.
 
-7.  > At this point, if Bob was Initiator, he is connected already. If
-    > he was a Responder, he should receive the above URQ\_AGREEMENT
-    > message, after which he switches to the *connected* state. In the
-    > case where the UDP packet with the agreement message gets lost,
-    > Bob will still enter the *connected* state once he receives
-    > anything else from Alice. If Bob is going to send, however, he has
-    > to continue sending the same URQ\_CONCLUSION until he gets the
-    > confirmation from Alice.
+7.   At this point, if Bob was Initiator, he is connected already. If
+     he was a Responder, he should receive the above URQ\_AGREEMENT
+     message, after which he switches to the *connected* state. In the
+     case where the UDP packet with the agreement message gets lost,
+     Bob will still enter the *connected* state once he receives
+     anything else from Alice. If Bob is going to send, however, he has
+     to continue sending the same URQ\_CONCLUSION until he gets the
+     confirmation from Alice.
 
 **Parallel Handshake Flow**
 
@@ -2848,23 +2848,23 @@ only occurs if the messages with URQ\_WAVEAHAND are sent and received by
 both peers at precisely the same time. This might happen in one of these
 situations:
 
-  - > if both Alice and Bob start sending URQ\_WAVEAHAND messages
-    > perfectly simultaneously,
+  -  if both Alice and Bob start sending URQ\_WAVEAHAND messages
+     perfectly simultaneously,
 
 or
 
-  - > if Bob starts later but sends his URQ\_WAVEAHAND message during
-    > the gap between the moment when Alice had earlier sent her
-    > message, and the moment when that message is received (that is, if
-    > each party receives the message from its peer immediately after
-    > having sent its own),
+  -  if Bob starts later but sends his URQ\_WAVEAHAND message during
+     the gap between the moment when Alice had earlier sent her
+     message, and the moment when that message is received (that is, if
+     each party receives the message from its peer immediately after
+     having sent its own),
 
 or
 
-  - > if, at the beginning of srt\_connect, Alice receives the first
-    > message from Bob exactly during the very short gap between the
-    > time Alice is adding a socket to the connector list and when she
-    > sends her first URQ\_WAVEAHANDmessage
+  -  if, at the beginning of srt\_connect, Alice receives the first
+     message from Bob exactly during the very short gap between the
+     time Alice is adding a socket to the connector list and when she
+     sends her first URQ\_WAVEAHANDmessage
 
 The resulting flow is very much like Bob‘s behaviour in the serial
 handshake flow, but for both parties. Alice and Bob will go through the
@@ -2884,127 +2884,127 @@ Here‘s how the parallel handshake flow works, based on roles:
 
 Initiator:
 
-1.  > Waving
+1.   Waving
     
-      - > Receives URQ\_WAVEAHAND message
+      -  Receives URQ\_WAVEAHAND message
     
-      - > Switches to Attention
+      -  Switches to Attention
     
-      - > Sends URQ\_CONCLUSION + HSREQ
+      -  Sends URQ\_CONCLUSION + HSREQ
 
-2.  > Attention
+2.   Attention
     
-      - > Receives URQ\_CONCLUSION message, which:
+      -  Receives URQ\_CONCLUSION message, which:
         
-          - > contains no extensions:
+          -  contains no extensions:
             
-              - > switches to Initiated, still sends URQ\_CONCLUSION +
-                > HSREQ
+              -  switches to Initiated, still sends URQ\_CONCLUSION +
+                 HSREQ
         
-          - > contains HSRSP extension:
+          -  contains HSRSP extension:
             
-              - > switches to Connected, sends URQ\_AGREEMENT
+              -  switches to Connected, sends URQ\_AGREEMENT
 
-3.  > Initiated
+3.   Initiated
     
-      - > Receives URQ\_CONCLUSION message, which:
+      -  Receives URQ\_CONCLUSION message, which:
         
-          - > Contains no extensions:
+          -  Contains no extensions:
             
-              - > REMAINS IN THIS STATE, still sends URQ\_CONCLUSION +
-                > HSREQ
+              -  REMAINS IN THIS STATE, still sends URQ\_CONCLUSION +
+                 HSREQ
         
-          - > contains HSRSP extension:
+          -  contains HSRSP extension:
             
-              - > switches to Connected, sends URQ\_AGREEMENT
+              -  switches to Connected, sends URQ\_AGREEMENT
 
-4.  > Connected
+4.   Connected
     
-      - > May receive URQ\_CONCLUSION and respond with URQ\_AGREEMENT,
-        > but normally by now it should already have received payload
-        > packets.
+      -  May receive URQ\_CONCLUSION and respond with URQ\_AGREEMENT,
+         but normally by now it should already have received payload
+         packets.
 
 Responder:
 
-1.  > Waving
+1.   Waving
     
-      - > Receives URQ\_WAVEAHAND message
+      -  Receives URQ\_WAVEAHAND message
     
-      - > Switches to Attention
+      -  Switches to Attention
     
-      - > Sends URQ\_CONCLUSION message (with no extensions)
+      -  Sends URQ\_CONCLUSION message (with no extensions)
 
-2.  > Attention
+2.   Attention
     
-      - > Receives URQ\_CONCLUSION message with HSREQ
+      -  Receives URQ\_CONCLUSION message with HSREQ
 
 > **NOTE**: T*his message might contain no extensions, in which case the
 > party shall simply send the empty URQ\_CONCLUSION message, as before,
 > and remain in this state.*
 
-  - > Switches to Initiated and sends URQ\_CONCLUSION message with HSRSP
+  -  Switches to Initiated and sends URQ\_CONCLUSION message with HSRSP
 
 <!-- end list -->
 
-3.  > Initiated
+3.   Initiated
     
-      - > Receives:
+      -  Receives:
         
-          - > URQ\_CONCLUSION message with HSREQ
+          -  URQ\_CONCLUSION message with HSREQ
             
-              - > responds with URQ\_CONCLUSION with HSRSP and remains
-                > in this state
+              -  responds with URQ\_CONCLUSION with HSRSP and remains
+                 in this state
         
-          - > URQ\_AGREEMENT message
+          -  URQ\_AGREEMENT message
             
-              - > responds with URQ\_AGREEMENT and switches to Connected
+              -  responds with URQ\_AGREEMENT and switches to Connected
         
-          - > Payload packet
+          -  Payload packet
             
-              - > responds with URQ\_AGREEMENT and switches to Connected
+              -  responds with URQ\_AGREEMENT and switches to Connected
 
-4.  > Connected
+4.   Connected
     
-      - > Is not expecting to receive any handshake messages anymore.
-        > The URQ\_AGREEMENT message is always sent only once or per
-        > every final URQ\_CONCLUSION message.
+      -  Is not expecting to receive any handshake messages anymore.
+         The URQ\_AGREEMENT message is always sent only once or per
+         every final URQ\_CONCLUSION message.
 
 Note that any of these packets may be missing, and the sending party
 will never become aware. The missing packet problem is resolved this
 way:
 
-1.  > If the Responder misses the URQ\_CONCLUSION + HSREQ message, it
-    > simply continues sending empty URQ\_CONCLUSION messages. Only upon
-    > reception of URQ\_CONCLUSION + HSREQ does it respond with
-    > URQ\_CONCLUSION+ HSRSP.
+1.   If the Responder misses the URQ\_CONCLUSION + HSREQ message, it
+     simply continues sending empty URQ\_CONCLUSION messages. Only upon
+     reception of URQ\_CONCLUSION + HSREQ does it respond with
+     URQ\_CONCLUSION+ HSRSP.
 
-2.  > If the Initiator misses the URQ\_CONCLUSION + HSRSP response from
-    > the Responder, it continues sending URQ\_CONCLUSION + HSREQ. The
-    > Responder must always respond with URQ\_CONCLUSION + HSRSP when
-    > the Initiator sends URQ\_CONCLUSION + HSREQ, even if it has
-    > already received and interpreted it.
+2.   If the Initiator misses the URQ\_CONCLUSION + HSRSP response from
+     the Responder, it continues sending URQ\_CONCLUSION + HSREQ. The
+     Responder must always respond with URQ\_CONCLUSION + HSRSP when
+     the Initiator sends URQ\_CONCLUSION + HSREQ, even if it has
+     already received and interpreted it.
 
-3.  > When the Initiator switches to the Connected state it responds
-    > with a URQ\_AGREEMENT message, which may be missed by the
-    > Responder. Nonetheless, the Initiator may start sending data
-    > packets because it considers itself connected. It doesn‘t know
-    > that the Responder has not yet switched to the Connected state.
-    > Therefore it is exceptionally allowed that when the Responder is
-    > in the Initiated state and receives a data packet (or any control
-    > packet that is normally sent only between connected parties) over
-    > this connection, it may switch to the Connected state just as if
-    > it had received a URQ\_AGREEMENT message.
+3.   When the Initiator switches to the Connected state it responds
+     with a URQ\_AGREEMENT message, which may be missed by the
+     Responder. Nonetheless, the Initiator may start sending data
+     packets because it considers itself connected. It doesn‘t know
+     that the Responder has not yet switched to the Connected state.
+     Therefore it is exceptionally allowed that when the Responder is
+     in the Initiated state and receives a data packet (or any control
+     packet that is normally sent only between connected parties) over
+     this connection, it may switch to the Connected state just as if
+     it had received a URQ\_AGREEMENT message.
 
-4.  > If the the Initiator is already switched to the Connected state it
-    > will not bother the Responder with any more handshake messages.
-    > But the Responder may be completely unaware of that (having missed
-    > the URQ\_AGREEMENTmessage from the Initiator). Therefore it
-    > doesn‘t exit the connecting state (still blocks on srt\_connect
-    > or doesn‘t signal connection readiness), which means that it
-    > continues sending URQ\_CONCLUSION + HSRSP messages until it
-    > receives any packet that will make it switch to the Connected
-    > state (normally URQ\_AGREEMENT). Only then does it exit the
-    > connecting state and the application can start transmission.
+4.   If the the Initiator is already switched to the Connected state it
+     will not bother the Responder with any more handshake messages.
+     But the Responder may be completely unaware of that (having missed
+     the URQ\_AGREEMENTmessage from the Initiator). Therefore it
+     doesn‘t exit the connecting state (still blocks on srt\_connect
+     or doesn‘t signal connection readiness), which means that it
+     continues sending URQ\_CONCLUSION + HSRSP messages until it
+     receives any packet that will make it switch to the Connected
+     state (normally URQ\_AGREEMENT). Only then does it exit the
+     connecting state and the application can start transmission.
 
 **Rendezvous Between Different Versions**
 
@@ -3057,17 +3057,17 @@ This means that the initial few data packets might be sent without
 having the appropriate SRT settings already working, which may raise two
 concerns:
 
-  - > *There is a delay in the application of latency to received
-    > packets* — At first, packets are being delivered immediately. It
-    > is only when the SRT\_CMD\_HSREQ message is processed that latency
-    > is applied to the received packets. The timestamp based packet
-    > delivery mechanism (TSBPD) isn‘t working until then.
+  -  *There is a delay in the application of latency to received
+     packets* — At first, packets are being delivered immediately. It
+     is only when the SRT\_CMD\_HSREQ message is processed that latency
+     is applied to the received packets. The timestamp based packet
+     delivery mechanism (TSBPD) isn‘t working until then.
 
-  - > *There is a delay in the application of encryption (if used) to
-    > received packets* — Packets can‘t be decrypted until the
-    > SRT\_CMD\_KMREQ is processed and the keys installed. The data
-    > packets are still encrypted, but the receiver can‘t decrypt them
-    > and will drop them.
+  -  *There is a delay in the application of encryption (if used) to
+     received packets* — Packets can‘t be decrypted until the
+     SRT\_CMD\_KMREQ is processed and the keys installed. The data
+     packets are still encrypted, but the receiver can‘t decrypt them
+     and will drop them.
 
 The codes for commands used are the same in HSv4 and HSv5 processes. In
 HSv4 these are minor message type codes used with the UMSG\_EXT command,
@@ -3086,21 +3086,21 @@ structure (without SRT header):
 The Extension Flags subfield in the Type field in a conclusion handshake
 message contains one of these flags:
 
-  - > HS\_EXT\_HSREQ: defines SRT characteristic data; always present
+  -  HS\_EXT\_HSREQ: defines SRT characteristic data; always present
 
-  - > HS\_EXT\_KMREQ: if using encryption, defines encryption block
+  -  HS\_EXT\_KMREQ: if using encryption, defines encryption block
 
-  - > HS\_EXT\_CONFIG: information about extra configuration data
-    > attached (if any)
+  -  HS\_EXT\_CONFIG: information about extra configuration data
+     attached (if any)
 
 The the HSv5 packet structure (shown above) can be split into three
 parts:
 
-1.  > The Handshake data (up to the “Peer IP Address” field)
+1.   The Handshake data (up to the “Peer IP Address” field)
 
-2.  > The HSREQ extension
+2.   The HSREQ extension
 
-3.  > The KMREQ extension
+3.   The KMREQ extension
 
 Note that extensions are added only in certain situations (as described
 above), so sometimes there are no extensions at all. When extensions are
@@ -3111,11 +3111,11 @@ placed after HSREQ and KMREQ.
 
 Every extension block has the following structure:
 
-1.  > a 16-bit command symbol
+1.   a 16-bit command symbol
 
-2.  > 16-bit block size (number of 32-bit words following this field)
+2.   16-bit block size (number of 32-bit words following this field)
 
-3.  > a number of 32-bit fields, as specified in (2) above
+3.   a number of 32-bit fields, as specified in (2) above
 
 What is contained in a block depends on the extension command code.
 
@@ -3134,28 +3134,28 @@ message undergo further verification. If the values are not acceptable,
 the connection will be rejected. This may happen in the following
 situations:
 
-1.  > The Version field contains 0. This means that the peer rejected
-    > the handshake.
+1.   The Version field contains 0. This means that the peer rejected
+     the handshake.
 
-2.  > The Version field was higher than 4, but no extensions were added
-    > (no extension flags set), while the rules state that they should
-    > be present. This is considered an error in the case of a
-    > URQ\_CONCLUSION message sent by the Initiator to the Responder
-    > (there can be an initial conclusion message without extensions
-    > sent by the Responder to the Initiator in Rendezvous connections).
+2.   The Version field was higher than 4, but no extensions were added
+     (no extension flags set), while the rules state that they should
+     be present. This is considered an error in the case of a
+     URQ\_CONCLUSION message sent by the Initiator to the Responder
+     (there can be an initial conclusion message without extensions
+     sent by the Responder to the Initiator in Rendezvous connections).
 
-3.  > Processing of any of the extension data has failed (also due to an
-    > internal error).
+3.   Processing of any of the extension data has failed (also due to an
+     internal error).
 
-4.  > Each side declares a transmission type that is not compatible with
-    > the other. This will be described further, along with other new
-    > HSv5 features; the HSv4 client supports only and exclusively one
-    > transmission type, which is *Live*. This is indicated in the Type
-    > field in the HSv4 handshake, which must be equal to UDT\_DGRAM
-    > (2), and in the HSv5 by the extra *Congestion Control* block
-    > declaration (see below). In any case, when there‘s no Congestion
-    > Control type declared, *Live* is assumed. Otherwise the Congestion
-    > Control type must be exactly the same on both sides.
+4.   Each side declares a transmission type that is not compatible with
+     the other. This will be described further, along with other new
+     HSv5 features; the HSv4 client supports only and exclusively one
+     transmission type, which is *Live*. This is indicated in the Type
+     field in the HSv4 handshake, which must be equal to UDT\_DGRAM
+     (2), and in the HSv5 by the extra *Congestion Control* block
+     declaration (see below). In any case, when there‘s no Congestion
+     Control type declared, *Live* is assumed. Otherwise the Congestion
+     Control type must be exactly the same on both sides.
 
 **NOTE**: *The TsbPd Resv and TsbPdDelay fields both refer to latency,
 but the use is different in HSv4 and HSv5.*
@@ -3178,19 +3178,19 @@ HSREQ messages contain both the Sender and Receiver latency values.
 
 The SRT\_CMD\_HSREQ message contains three 32-bit fields designated as:
 
-  - > SRT\_HS\_VERSION: string (0x00XXYYZZ) representing SRT version
-    > XX.YY.ZZ
+  -  SRT\_HS\_VERSION: string (0x00XXYYZZ) representing SRT version
+     XX.YY.ZZ
 
-  - > SRT\_HS\_FLAGS: the SRT flags (see below)
+  -  SRT\_HS\_FLAGS: the SRT flags (see below)
 
-  - > SRT\_HS\_LATENCY: the latency specification
+  -  SRT\_HS\_LATENCY: the latency specification
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_079_Image_0003.png)
 
 The flags (SRT Flags field) are the following bits, in order:
 
-0.  > SRT\_OPT\_TSBPDSND: The party will be sending in TSBPD (Time Stamp
-    > Based Packet Delivery) mode.
+0.   SRT\_OPT\_TSBPDSND: The party will be sending in TSBPD (Time Stamp
+     Based Packet Delivery) mode.
 
 > This is used by the Sender party to specify that it will use TSBPD
 > mode. The Responder should respond with its setting for TSBPD
@@ -3198,37 +3198,37 @@ The flags (SRT Flags field) are the following bits, in order:
 > reception TSBPD flag not set. In HSv4, this is only used by the
 > Initiator.
 
-1.  > SRT\_OPT\_TSBPDRCV: The party expects to receive in TSBPD mode.
+1.   SRT\_OPT\_TSBPDRCV: The party expects to receive in TSBPD mode.
 
 > This is used by a party to specify that it expects to receive in TSBPD
 > mode. The Responder should respond to this setting with TSBPD sending
 > mode (HSv5 only) and set the sending TSBPD flag appropriately. In HSv4
 > this is only used by the Responder party.
 
-2.  > SRT\_OPT\_HAICRYPT: The party includes haicrypt (legacy flag).
+2.   SRT\_OPT\_HAICRYPT: The party includes haicrypt (legacy flag).
 
 > This special legacy compatibility flag should be always set. See below
 > for more details.
 
-3.  > SRT\_OPT\_TLPKTDROP: The party will do TLPKTDROP.
+3.   SRT\_OPT\_TLPKTDROP: The party will do TLPKTDROP.
 
 > Declares the SRTO\_TLPKTDROP flag of the party. This is important
 > because both parties must cooperate in this process. In HSv5, if both
 > directions are TSBPD, both use this setting. This flag must always be
 > set in live mode.
 
-4.  > SRT\_OPT\_NAKREPORT: The party will do periodic NAK reporting.
+4.   SRT\_OPT\_NAKREPORT: The party will do periodic NAK reporting.
 
 > Declares the SRTO\_NAKREPORT flag of the party. This flag means that
 > periodic NAK reports will be sent (repeated UMSG\_LOSSREPORT message
 > when the sender seems to linger with retransmission).
 
-5.  > SRT\_OPT\_REXMITFLG: The party uses the REXMIT flag.
+5.   SRT\_OPT\_REXMITFLG: The party uses the REXMIT flag.
 
 > This special legacy compatibility flag should be always set. See below
 > for more details.
 
-6.  > SRT\_OPT\_STREAM: The party uses stream type transmission.
+6.   SRT\_OPT\_STREAM: The party uses stream type transmission.
 
 > This is introduced in HSv5 only. When set, the party is using a stream
 > type transmission (file transmission with no boundaries). In HSv4 this
@@ -3246,18 +3246,18 @@ most significant bits in this field (the rest are assigned to the
 Message Number). Some of these extra flags were already in UDT, but SRT
 added some more by re-assigning bits from the Message Number subfield:
 
-1.  > Encryption Key flags (2 bits). Controlled by SRT\_OPT\_HAICRYPT,
-    > this field contains a value that declares whether the payload is
-    > encrypted and with which key.
+1.   Encryption Key flags (2 bits). Controlled by SRT\_OPT\_HAICRYPT,
+     this field contains a value that declares whether the payload is
+     encrypted and with which key.
 
-2.  > Retransmission flag (1 bit). Controlled by SRT\_OPT\_REXMITFLG,
-    > this flag is 0 when a packet is sent the first time, and 1 when it
-    > is retransmitted (i.e. requested in a loss report). When the
-    > incoming packet is late (one with a sequence number older than the
-    > newest received so far), this flag allows the Receiver to
-    > distinguish between a retransmitted packet and a reordered packet.
-    > This is used by the “reorder tolerance” feature described in the
-    > API documentation under SRTO\_LOSSMAXTTL socket option.
+2.   Retransmission flag (1 bit). Controlled by SRT\_OPT\_REXMITFLG,
+     this flag is 0 when a packet is sent the first time, and 1 when it
+     is retransmitted (i.e. requested in a loss report). When the
+     incoming packet is late (one with a sequence number older than the
+     newest received so far), this flag allows the Receiver to
+     distinguish between a retransmitted packet and a reordered packet.
+     This is used by the “reorder tolerance” feature described in the
+     API documentation under SRTO\_LOSSMAXTTL socket option.
 
 As of version 1.2.0 both these fields are in use, and therefore both
 these flags must always be set. In theory, there might still exist some
@@ -3279,24 +3279,24 @@ It is split into two 16-bit parts. The usage differs in HSv4 and HSv5.
 In HSv4 only the lower part (bits 16 - 31) is used. The upper part (bits
 0 - 15) is always 0. The interpretation of this field is as follows:
 
-  - > Receiver party: Receiver latency
+  -  Receiver party: Receiver latency
 
-  - > Sender party: Sender latency
+  -  Sender party: Sender latency
 
 In HSv5 both 16-bit parts of the field are used, and interpreted as
 follows:
 
-  - > Upper 16 bits (0 - 15): Receiver latency
+  -  Upper 16 bits (0 - 15): Receiver latency
 
-  - > Lower 16 bits (16 - 31): Sender latency
+  -  Lower 16 bits (16 - 31): Sender latency
 
 The characteristics of Sender and Receiver latency are the following:
 
-1.  > Sender latency is the minimum latency that the Sender wants the
-    > Receiver to use.
+1.   Sender latency is the minimum latency that the Sender wants the
+     Receiver to use.
 
-2.  > Receiver latency is the (minimum) value that the Receiver wishes
-    > to apply to the stream that it will be receiving.
+2.   Receiver latency is the (minimum) value that the Receiver wishes
+     to apply to the stream that it will be receiving.
 
 Once these values are exchanged via the extended handshake, an effective
 latency is established, which is always the maximum of the two. Note
@@ -3311,69 +3311,69 @@ effective latencies.
 Here is an example of an HSv5 bidirectional transmission between Alice
 and Bob, where Alice is Initiator:
 
-1.  > Alice and Bob set the following latency values:
+1.   Alice and Bob set the following latency values:
 
 <!-- end list -->
 
-  - > Alice: SRTO\_PEERLATENCY = 250 ms, SRTO\_RCVLATENCY = 550 ms
+  -  Alice: SRTO\_PEERLATENCY = 250 ms, SRTO\_RCVLATENCY = 550 ms
 
-  - > Bob: SRTO\_PEERLATENCY = 500 ms, SRTO\_RCVLATENCY = 300 ms
-
-<!-- end list -->
-
-2.  > Alice defines the latency field in the HSREQ message:
+  -  Bob: SRTO\_PEERLATENCY = 500 ms, SRTO\_RCVLATENCY = 300 ms
 
 <!-- end list -->
 
-  - > hs\[SRT\_HS\_LATENCY\] = { 250, 550 }; // { Lower, Upper }
+2.   Alice defines the latency field in the HSREQ message:
 
 <!-- end list -->
 
-3.  > Bob receives it, sets his options, and responds with HSRSP:
+  -  hs\[SRT\_HS\_LATENCY\] = { 250, 550 }; // { Lower, Upper }
 
 <!-- end list -->
 
-  - > SRTO\_RCVLATENCY = max(300, 250); //\<-- 250:Alice‘s PEERLATENCY
-
-  - > SRTO\_PEERLATENCY = max(500, 550); //\<-- 550:Alice‘s RCVLATENCY
-
-  - > hs\[SRT\_HS\_LATENCY\] = { 550, 300 };
+3.   Bob receives it, sets his options, and responds with HSRSP:
 
 <!-- end list -->
 
-4.  > Alice receives this HSRSP and sets:
+  -  SRTO\_RCVLATENCY = max(300, 250); //\<-- 250:Alice‘s PEERLATENCY
+
+  -  SRTO\_PEERLATENCY = max(500, 550); //\<-- 550:Alice‘s RCVLATENCY
+
+  -  hs\[SRT\_HS\_LATENCY\] = { 550, 300 };
 
 <!-- end list -->
 
-  - > SRTO\_RCVLATENCY = 550;
-
-  - > SRTO\_PEERLATENCY = 300;
+4.   Alice receives this HSRSP and sets:
 
 <!-- end list -->
 
-5.  > We now have the effective latency values:
+  -  SRTO\_RCVLATENCY = 550;
+
+  -  SRTO\_PEERLATENCY = 300;
 
 <!-- end list -->
 
-  - > For transmissions from Alice to Bob: 300 ms
+5.   We now have the effective latency values:
 
-  - > For transmissions from Bob to Alice: 550 ms
+<!-- end list -->
+
+  -  For transmissions from Alice to Bob: 300 ms
+
+  -  For transmissions from Bob to Alice: 550 ms
 
 Here is an example of an HSv4 exchange, which is simpler because there‘s
 only one direction. We‘ll refer to Alice and Bob again to be consistent
 with the Initiator/Responder roles in the HSv5 example:
 
-1.  > Alice sets SRTO\_LATENCY to 250 ms
+1.   Alice sets SRTO\_LATENCY to 250 ms
 
-2.  > Bob sets SRTO\_LATENCY to 300 ms
+2.   Bob sets SRTO\_LATENCY to 300 ms
 
-3.  > Alice sends hs\[SRT\_HS\_LATENCY\] = { 250, 0 }; to Bob
+3.   Alice sends hs\[SRT\_HS\_LATENCY\] = { 250, 0 }; to Bob
 
-4.  > Bob does SRTO\_LATENCY = max(300, 250);
+4.   Bob does SRTO\_LATENCY = max(300, 250);
 
-5.  > Bob sends hs\[SRT\_HS\_LATENCY\] = {300, 0}; to Alice
+5.   Bob sends hs\[SRT\_HS\_LATENCY\] = {300, 0}; to Alice
 
-6.  > Alice sets SRTO\_LATENCY to 300
+6.   Alice sets SRTO\_LATENCY to 300
 
 Note that the SRTO\_LATENCY option in HSv5 sets both SRTO\_RCVLATENCY
 and SRTO\_PEERLATENCY to the same value, although when reading,
@@ -3400,24 +3400,24 @@ unlike other extensions.
 Note that when the encryption settings are different at each end, then
 the connection is still allowed, but with the following restrictions:
 
-  - > If the Initiator declares encryption, but the Responder does not,
-    > then the Responder responds with SRT\_KM\_S\_NOSECRET status. This
-    > means that the Responder will not be able to decrypt data sent by
-    > the Initiator, but the Responder can still send unencrypted data
-    > to the Initiator.
+  -  If the Initiator declares encryption, but the Responder does not,
+     then the Responder responds with SRT\_KM\_S\_NOSECRET status. This
+     means that the Responder will not be able to decrypt data sent by
+     the Initiator, but the Responder can still send unencrypted data
+     to the Initiator.
 
-  - > If the Initiator did not declare encryption, but the Responder
-    > did, then the Responder will attach SRT\_CMD\_KMRSP(despite the
-    > fact that the Initiator did not send SRT\_CMD\_KMREQ) with
-    > SRT\_KM\_S\_UNSECURED status. The Responder won‘t be able to send
-    > data to the Initiator (more precisely, it will send scrambled
-    > data, not able to be decrypted), but the Initiator will still be
-    > able to send unencrypted data to the Responder.
+  -  If the Initiator did not declare encryption, but the Responder
+     did, then the Responder will attach SRT\_CMD\_KMRSP(despite the
+     fact that the Initiator did not send SRT\_CMD\_KMREQ) with
+     SRT\_KM\_S\_UNSECURED status. The Responder won‘t be able to send
+     data to the Initiator (more precisely, it will send scrambled
+     data, not able to be decrypted), but the Initiator will still be
+     able to send unencrypted data to the Responder.
 
-  - > If both have declared encryption, but have set different
-    > passwords, the Responder will send a KMRSP block with an
-    > SRT\_KM\_S\_BADSECRET value. The transmission in both directions
-    > will be “scrambled” (encrypted and not decryptable).
+  -  If both have declared encryption, but have set different
+     passwords, the Responder will send a KMRSP block with an
+     SRT\_KM\_S\_BADSECRET value. The transmission in both directions
+     will be “scrambled” (encrypted and not decryptable).
 
 The value of the encryption status can be retrieved from the
 SRTO\_SNDKMSTATE and SRTO\_RCVKMSTATE options. The legacy (or
@@ -3428,50 +3428,50 @@ resolves to SRTO\_SNDKMSTATE.
 The values retrieved from these options depend on the result of the KMX
 process:
 
-1.  > If only one party declares encryption, the KM state will be one of
-    > the following:
+1.   If only one party declares encryption, the KM state will be one of
+     the following:
     
-      - > For the party that declares no encryption:
+      -  For the party that declares no encryption:
         
-          - > RCVKMSTATE: NOSECRET
+          -  RCVKMSTATE: NOSECRET
         
-          - > SNDKMSTATE: UNSECURED
+          -  SNDKMSTATE: UNSECURED
         
-          - > Result: This party can send payloads unencrypted, but it
-            > can‘t decrypt packets received from its peer.
+          -  Result: This party can send payloads unencrypted, but it
+             can‘t decrypt packets received from its peer.
     
-      - > For the party that declares encryption:
+      -  For the party that declares encryption:
         
-          - > RCVKMSTATE: UNSECURED
+          -  RCVKMSTATE: UNSECURED
         
-          - > SNDKMSTATE: NOSECRET
+          -  SNDKMSTATE: NOSECRET
         
-          - > Result: This party can receive unencrypted payloads from
-            > its peer, and will be able to send encrypted payloads to
-            > the peer, but the peer won‘t decrypt them.
+          -  Result: This party can receive unencrypted payloads from
+             its peer, and will be able to send encrypted payloads to
+             the peer, but the peer won‘t decrypt them.
 
-2.  > If both declare encryption, but they have different passwords,
-    > then both states are SRT\_KM\_S\_BADSECRET. In such a situation
-    > both sides may send payloads, but the other party won‘t decrypt
-    > them.
+2.   If both declare encryption, but they have different passwords,
+     then both states are SRT\_KM\_S\_BADSECRET. In such a situation
+     both sides may send payloads, but the other party won‘t decrypt
+     them.
 
-3.  > If both declare encryption and the password is the same on both
-    > sides, then both states are SRT\_KM\_S\_SECURED. The transmission
-    > will be correctly performed with encryption in both directions.
+3.   If both declare encryption and the password is the same on both
+     sides, then both states are SRT\_KM\_S\_SECURED. The transmission
+     will be correctly performed with encryption in both directions.
 
 Note that due to the introduction of the bidirectional feature in HSv5
 (and therefore the Initiator and Responder roles), the old HSv4 method
 of initializing the crypto objects used for security is used only in one
 of the directions. This is now called “forward KMX”:
 
-1.  > The Initiator initializes its Sender Crypto (TXC) with
-    > preconfigured values. The SEK and SALT values are
-    > random-generated.
+1.   The Initiator initializes its Sender Crypto (TXC) with
+     preconfigured values. The SEK and SALT values are
+     random-generated.
 
-2.  > The Initiator sends a KMX message to the Receiver.
+2.   The Initiator sends a KMX message to the Receiver.
 
-3.  > The Receiver deploys the KMX message into its Receiver Crypto
-    > (RXC)
+3.   The Receiver deploys the KMX message into its Receiver Crypto
+     (RXC)
 
 This is the general process of Security Association done for the
 “forward direction”, that is, when done by the Sender. However, as
@@ -3479,27 +3479,27 @@ there‘s only one KMX process in the handshake, in HSv5 this must also
 initialize the crypto in the opposite direction. This is accomplished by
 “reverse KMX”:
 
-1.  > The Initiator initializes its Sender Crypto (TXC), like above, and
-    > then clones it to the Receiver Crypto.
+1.   The Initiator initializes its Sender Crypto (TXC), like above, and
+     then clones it to the Receiver Crypto.
 
-2.  > The Initiator sends a KMX message to the Responder.
+2.   The Initiator sends a KMX message to the Responder.
 
-3.  > The Responder deploys the KMX message into its Receiver Crypto
-    > (RXC)
+3.   The Responder deploys the KMX message into its Receiver Crypto
+     (RXC)
 
-4.  > The Responder initializes its Sender Crypto by cloning the
-    > Receiver Crypto, that is, by extracting the SEK and SALT from the
-    > Receiver Crypto and using them to initialize the Sender Crypto
-    > (clone the keys).
+4.   The Responder initializes its Sender Crypto by cloning the
+     Receiver Crypto, that is, by extracting the SEK and SALT from the
+     Receiver Crypto and using them to initialize the Sender Crypto
+     (clone the keys).
 
 This way the Sender (being a Responder) has the Sender Crypto
 initialized in a manner very similar to that of the Initiator. The only
 difference is that the SEK and SALT parameters in the crypto are:
 
-  - > random-generated on the Initiator side
+  -  random-generated on the Initiator side
 
-  - > extracted (on the Responder side) from the Receiver Crypto, which
-    > was configured by the incoming KMX message
+  -  extracted (on the Responder side) from the Receiver Crypto, which
+     was configured by the incoming KMX message
 
 The extra operations defined as “reverse KMX” happen exclusively in the
 HSv5 handshake.
@@ -3509,12 +3509,12 @@ predefined number of packets has been sent. To ensure the “soft handoff”
 to the new key, this process consists of three activities performed in
 order:
 
-1.  > Pre-announcing of the key (SEK is sent by Sender to Receiver)
+1.   Pre-announcing of the key (SEK is sent by Sender to Receiver)
 
-2.  > Switching the key (at some point packets are encrypted with the
-    > new key)
+2.   Switching the key (at some point packets are encrypted with the
+     new key)
 
-3.  > Decommissioning the key (removing the old, unused key)
+3.   Decommissioning the key (removing the old, unused key)
 
 Pre-announcing is done using an SRT Extended Message with the
 SRT\_CMD\_KMREQ extended type, where only the “forward KMX” part is
@@ -3530,13 +3530,13 @@ packets exceeds a certain value (up to the moment of the connection or
 previous refresh), which is controlled by the SRTO\_KMREFRESHRATE and
 SRTO\_KMPREANNOUNCE options:
 
-1.  > Pre-announce: when \## of sent packets \> SRTO\_KMREFRESHRATE -
-    > SRTO\_KMPREANNOUNCE
+1.   Pre-announce: when \## of sent packets \> SRTO\_KMREFRESHRATE -
+     SRTO\_KMPREANNOUNCE
 
-2.  > Key switch: when \## of sent packets \> SRTO\_KMREFRESHRATE
+2.   Key switch: when \## of sent packets \> SRTO\_KMREFRESHRATE
 
-3.  > Decommission: when \## of sent packets \> SRTO\_KMREFRESHRATE +
-    > SRTO\_KMPREANNOUNCE
+3.   Decommission: when \## of sent packets \> SRTO\_KMREFRESHRATE +
+     SRTO\_KMPREANNOUNCE
 
 In other words, SRTO\_KMREFRESHRATE is the exact number of transmitted
 packets for which a key switch happens. The Pre-announce happens
@@ -3549,21 +3549,21 @@ received.
 
 The following activities occur when keys are refreshed:
 
-1.  > Pre-announce: The new key is generated and sent to the Receiver
-    > using the SRT Extended Message SRT\_CMD\_KMREQ. The received key
-    > is deployed into the Receiver Crypto. The Receiver sends back the
-    > same message through SRT\_CMD\_KMRSP as a confirmation that the
-    > refresh was successful (if it wasn‘t, the message contains an
-    > error code).
+1.   Pre-announce: The new key is generated and sent to the Receiver
+     using the SRT Extended Message SRT\_CMD\_KMREQ. The received key
+     is deployed into the Receiver Crypto. The Receiver sends back the
+     same message through SRT\_CMD\_KMRSP as a confirmation that the
+     refresh was successful (if it wasn‘t, the message contains an
+     error code).
 
-2.  > Key Switch: The Encryption Flags in the PH\_MSGNO field get
-    > toggled between EK\_EVEN and EK\_ODD. From this moment on, the
-    > opposite (newly generated) key is used.
+2.   Key Switch: The Encryption Flags in the PH\_MSGNO field get
+     toggled between EK\_EVEN and EK\_ODD. From this moment on, the
+     opposite (newly generated) key is used.
 
-3.  > Decommission: The old key (the key that was used with the previous
-    > flag state) is decommissioned on both the Sender and Receiver
-    > sides. The place for the key remains open for future key
-    > refreshing.
+3.   Decommission: The old key (the key that was used with the previous
+     flag state) is decommissioned on both the Sender and Receiver
+     sides. The place for the key remains open for future key
+     refreshing.
 
 **NOTE**: *The handlers for KMREQ and KMRSP are the same for handling
 the request coming through an SRT Extended Message and through the
@@ -3747,44 +3747,44 @@ SRT Extensions** (cont’d)
 
 ### SRT Alliance
 
-  - > <span class="underline">SRT Deployment Guide</span>
+  -  <span class="underline">SRT Deployment Guide</span>
 
 ### SRT on GitHub
 
-  - > <span class="underline">API.md</span>
+  -  <span class="underline">API.md</span>
 
-  - > <span class="underline">build\_iOS.md</span>
+  -  <span class="underline">build\_iOS.md</span>
 
-  - > <span class="underline">encryption.md</span>
+  -  <span class="underline">encryption.md</span>
 
-  - > <span class="underline">live-streaming.md</span>
+  -  <span class="underline">live-streaming.md</span>
 
-  - > <span class="underline">reporting.md</span>
+  -  <span class="underline">reporting.md</span>
 
-  - > <span class="underline">stransmit.md</span>
+  -  <span class="underline">stransmit.md</span>
 
-  - > <span class="underline">why-srt-was-created.md</span>
+  -  <span class="underline">why-srt-was-created.md</span>
 
-  - > [<span class="underline">handshake.md</span>](https://github.com/ethouris/srt/blob/97386cc7646d1152bf0257f3e6da4545d48aa5a1/docs/handshake.md)
+  -  [<span class="underline">handshake.md</span>](https://github.com/ethouris/srt/blob/97386cc7646d1152bf0257f3e6da4545d48aa5a1/docs/handshake.md)
 
 ### UDT
 
-  - > [<span class="underline">http://udt.sourceforge.net/doc.html</span>](http://udt.sourceforge.net/doc.html)
+  -  [<span class="underline">http://udt.sourceforge.net/doc.html</span>](http://udt.sourceforge.net/doc.html)
 
 > **Protocol Specification**
 
-  - > UDT Internet Draft (04/12/2010):
-    > [<span class="underline">draft-gg-udt-03.txt</span>](http://udt.sourceforge.net/doc/draft-gg-udt-03.txt)
+  -  UDT Internet Draft (04/12/2010):
+     [<span class="underline">draft-gg-udt-03.txt</span>](http://udt.sourceforge.net/doc/draft-gg-udt-03.txt)
 
 > **User Manual**
 
-  - > <span class="underline">UDT version 4</span>
+  -  <span class="underline">UDT version 4</span>
 
-  - > <span class="underline">UDT version 3</span>
+  -  <span class="underline">UDT version 3</span>
 
 > **Technical Papers**
 
-  - > UDTv4: Improvements in Performance and Usability
+  -  UDTv4: Improvements in Performance and Usability
 
 Yunhong Gu and Robert L. Grossman
 
@@ -3794,14 +3794,14 @@ GridNets 2008, Beijing, China, October 8-10, 2008.
 KB\]</span>](http://udt.sourceforge.net/doc/udt-ccc-sc05-v10.pdf)
 <span class="underline">Presentation (PPT) \[171 KB\]</span>
 
-  - > UDT: UDP-based Data Transfer for High-Speed Wide Area Networks
+  -  UDT: UDP-based Data Transfer for High-Speed Wide Area Networks
 
 Yunhong Gu and Robert L. Grossman
 
 Computer Networks (Elsevier). Volume 51, Issue 7. May 2007.
 
-  - > Supporting Configurable Congestion Control in Data Transport
-    > Services
+  -  Supporting Configurable Congestion Control in Data Transport
+     Services
 
 Yunhong Gu and Robert L. Grossman
 
@@ -3811,7 +3811,7 @@ SC 2005, Nov 12 - 18, Seattle, WA, USA
 KB\]</span>](http://udt.sourceforge.net/doc/udt-ccc-sc05-v10.pdf)
 <span class="underline">Presentation (PPT) \[171 KB\]</span>
 
-  - > Optimizing UDP-based Protocol Implementation
+  -  Optimizing UDP-based Protocol Implementation
 
 Yunhong Gu and Robert L. Grossman
 
@@ -3821,8 +3821,8 @@ PFLDNet 2005, Lyon, France, Feb. 2005
 KB\]</span>](http://udt.sourceforge.net/doc/pfldnet2005-v8.pdf)
 <span class="underline">Presentation (PPT) \[272 KB\]</span>
 
-  - > Experiences in Design and Implementation of a High Performance
-    > Transport Protocol
+  -  Experiences in Design and Implementation of a High Performance
+     Transport Protocol
 
 Yunhong Gu, Xinwei Hong, and Robert L. Grossman
 
@@ -3832,7 +3832,7 @@ SC 2004, Nov 6 - 12, Pittsburgh, PA, USA.
 KB\]</span>](http://udt.sourceforge.net/doc/udt-design-sc04-v8.pdf)
 <span class="underline">Presentation (PPT) \[490 KB\]</span>
 
-  - > An Analysis of AIMD Algorithms with Decreasing Increases
+  -  An Analysis of AIMD Algorithms with Decreasing Increases
 
 Yunhong Gu, Xinwei Hong and Robert L. Grossman
 
@@ -3843,7 +3843,7 @@ First Workshop on Networks for Grid Applications (Gridnets 2004), Oct.
 KB\]</span>](http://udt.sourceforge.net/doc/gridnet-v8.pdf)
 <span class="underline">Presentation (PPT) \[313 KB\]</span>
 
-  - > SABUL: A Transport Protocol for Grid Computing
+  -  SABUL: A Transport Protocol for Grid Computing
 
 Yunhong Gu and Robert L. Grossman
 
@@ -3853,106 +3853,106 @@ Journal of Grid Computing, 2003, Volume 1, Issue 4, pp. 377-386
 
 > **Presentations**
 
-  - > [<span class="underline">UDT: Breaking the Data Transfer
-    > Bottleneck</span>](http://udt.sourceforge.net/doc/udt.ppt), Oct.
-    > 2005. ([<span class="underline">Updated
-    > version</span>](http://udt.sourceforge.net/doc/udt-2009.ppt), Aug.
-    > 2009)
+  -  [<span class="underline">UDT: Breaking the Data Transfer
+     Bottleneck</span>](http://udt.sourceforge.net/doc/udt.ppt), Oct.
+     2005. ([<span class="underline">Updated
+     version</span>](http://udt.sourceforge.net/doc/udt-2009.ppt), Aug.
+     2009)
 
-  - > [<span class="underline">An Introduction to
-    > UDT</span>](http://udt.sourceforge.net/doc/I2Spring-UDT.ppt):
-    > Spring 2005 Internet2 Member Meeting, Arlington, VA, May 2 - 5,
-    > 2005.
+  -  [<span class="underline">An Introduction to
+     UDT</span>](http://udt.sourceforge.net/doc/I2Spring-UDT.ppt):
+     Spring 2005 Internet2 Member Meeting, Arlington, VA, May 2 - 5,
+     2005.
 
-  - > [<span class="underline">UDT: UDP-based Data
-    > Transfer</span>](http://udt.sourceforge.net/doc/pfldnet04-udt-uic-anl.ppt):
-    > PFLDNet 2004, Chicago, IL, Feb. 17 - 18, 2004.
+  -  [<span class="underline">UDT: UDP-based Data
+     Transfer</span>](http://udt.sourceforge.net/doc/pfldnet04-udt-uic-anl.ppt):
+     PFLDNet 2004, Chicago, IL, Feb. 17 - 18, 2004.
 
-  - > An Introduction to SABUL/UDT: ESCC/Internet2 Techs Workshop,
-    > Lawrence, KS, August 4 - 7, 2003.
+  -  An Introduction to SABUL/UDT: ESCC/Internet2 Techs Workshop,
+     Lawrence, KS, August 4 - 7, 2003.
 
-  - > [<span class="underline">A UDT
-    > Tutorial</span>](http://udt.sourceforge.net/doc/udt-tutorial.ppt)
-    > (SC 2004, outdated)
+  -  [<span class="underline">A UDT
+     Tutorial</span>](http://udt.sourceforge.net/doc/udt-tutorial.ppt)
+     (SC 2004, outdated)
 
 ### Encryption
 
-  - > \[ANSX9.102\] Accredited Standards Committee, Wrapping of Keys and
-    > Associated Data, ANS X9.102, not for free document.
+  -  \[ANSX9.102\] Accredited Standards Committee, Wrapping of Keys and
+     Associated Data, ANS X9.102, not for free document.
 
-  - > \[FIPS 140-2\] Security Requirements for Cryptographic Modules,
-    > NIST, [<span class="underline">FIPS PUB
-    > 140-2</span>](https://csrc.nist.gov/csrc/media/publications/fips/140/2/final/documents/fips1402.pdf),
-    > May 2001.
+  -  \[FIPS 140-2\] Security Requirements for Cryptographic Modules,
+     NIST, [<span class="underline">FIPS PUB
+     140-2</span>](https://csrc.nist.gov/csrc/media/publications/fips/140/2/final/documents/fips1402.pdf),
+     May 2001.
 
-  - > \[FIPS 140-3\] Security Requirements for Cryptographic Modules,
-    > NIST, [<span class="underline">FIPS PUB
-    > 140-3</span>](https://csrc.nist.gov/publications/detail/fips/140/3/archive/2009-12-11),
-    > December 2009.
+  -  \[FIPS 140-3\] Security Requirements for Cryptographic Modules,
+     NIST, [<span class="underline">FIPS PUB
+     140-3</span>](https://csrc.nist.gov/publications/detail/fips/140/3/archive/2009-12-11),
+     December 2009.
 
-  - > \[SP800-38A\] Recommendation for Block Cipher Modes of Operation,
-    > M. Dworkin, NIST,
-    > [<span class="underline">FP800-38A</span>](https://csrc.nist.gov/publications/detail/sp/800-38a/final),
-    > December 2001.
+  -  \[SP800-38A\] Recommendation for Block Cipher Modes of Operation,
+     M. Dworkin, NIST,
+     [<span class="underline">FP800-38A</span>](https://csrc.nist.gov/publications/detail/sp/800-38a/final),
+     December 2001.
 
-  - > \[HDCP2\] High-bandwidth Digital Content Protection System,
-    > Interface Independent Adaptation, Revision 2.0,
-    > [<span class="underline">HDCP IIA
-    > 2.0</span>](https://www.digital-cp.com/files/static_page_files/2C1C0F30-0E09-E813-BFAB6BAAE8A76080/HDCP%20Interface%20Independent%20Adaptation%20Specification%20Rev2_0.pdf),
-    > Digital Content Protection, LLC, October 2008.
+  -  \[HDCP2\] High-bandwidth Digital Content Protection System,
+     Interface Independent Adaptation, Revision 2.0,
+     [<span class="underline">HDCP IIA
+     2.0</span>](https://www.digital-cp.com/files/static_page_files/2C1C0F30-0E09-E813-BFAB6BAAE8A76080/HDCP%20Interface%20Independent%20Adaptation%20Specification%20Rev2_0.pdf),
+     Digital Content Protection, LLC, October 2008.
 
-  - > \[PKCS5\] [<span class="underline">PKCS \#5 v2.0 Password-Based
-    > Cryptography
-    > Standard</span>](http://www.rsa.com/rsalabs/node.asp?id=2127), RSA
-    > Laboratories, March 1999.
+  -  \[PKCS5\] [<span class="underline">PKCS \#5 v2.0 Password-Based
+     Cryptography
+     Standard</span>](http://www.rsa.com/rsalabs/node.asp?id=2127), RSA
+     Laboratories, March 1999.
 
-  - > \[RFC2998\] PKCS \#5: Password-Based Cryptography Specification
-    > Version 2.0, B. Kaliski,
-    > [<span class="underline">RFC2898</span>](https://tools.ietf.org/html/rfc2898),
-    > September 2000.
+  -  \[RFC2998\] PKCS \#5: Password-Based Cryptography Specification
+     Version 2.0, B. Kaliski,
+     [<span class="underline">RFC2898</span>](https://tools.ietf.org/html/rfc2898),
+     September 2000.
 
-  - > \[RFC3394\] Advanced Encryption Standard (AES) Key Wrap Algorithm,
-    > J. Schaad, R. Housley,
-    > [<span class="underline">RFC3394</span>](https://tools.ietf.org/html/rfc3394),
-    > September 2002.
+  -  \[RFC3394\] Advanced Encryption Standard (AES) Key Wrap Algorithm,
+     J. Schaad, R. Housley,
+     [<span class="underline">RFC3394</span>](https://tools.ietf.org/html/rfc3394),
+     September 2002.
 
-  - > \[RFC3547\] The Group Domain of Interpretation, M. Baugher, B.
-    > Weis, T. Hardjono, H. Harney,
-    > [<span class="underline">RFC3547</span>](https://tools.ietf.org/html/rfc3547),
-    > July 2003.
+  -  \[RFC3547\] The Group Domain of Interpretation, M. Baugher, B.
+     Weis, T. Hardjono, H. Harney,
+     [<span class="underline">RFC3547</span>](https://tools.ietf.org/html/rfc3547),
+     July 2003.
 
-  - > \[RFC3610\] Counter with CBC-MAC (CCM), D. Whiting, R. Housley, N.
-    > Ferguson,
-    > [<span class="underline">RFC3610</span>](https://tools.ietf.org/html/rfc3610),
-    > September 2003.
+  -  \[RFC3610\] Counter with CBC-MAC (CCM), D. Whiting, R. Housley, N.
+     Ferguson,
+     [<span class="underline">RFC3610</span>](https://tools.ietf.org/html/rfc3610),
+     September 2003.
 
-  - > \[RFC3711\] The Secure Real-time Transport Protocol (SRTP), M.
-    > Baugher, D. McGrew, M. Naslund, E. Carrara, K. Norrman,
-    > [<span class="underline">RFC3711</span>](https://tools.ietf.org/html/rfc3711),
-    > March 2004.
+  -  \[RFC3711\] The Secure Real-time Transport Protocol (SRTP), M.
+     Baugher, D. McGrew, M. Naslund, E. Carrara, K. Norrman,
+     [<span class="underline">RFC3711</span>](https://tools.ietf.org/html/rfc3711),
+     March 2004.
 
-  - > \[RFC3830\] MIKEY: Multimedia Internet KEYing, J, Arkko, E.
-    > Carrara, F. Lindholm, M. Naslund, K. Norrman,
-    > [<span class="underline">RFC3830</span>](https://tools.ietf.org/html/rfc3830),
-    > August 2004.
+  -  \[RFC3830\] MIKEY: Multimedia Internet KEYing, J, Arkko, E.
+     Carrara, F. Lindholm, M. Naslund, K. Norrman,
+     [<span class="underline">RFC3830</span>](https://tools.ietf.org/html/rfc3830),
+     August 2004.
 
-  - > \[RFC5297\] Synthetic Initialization Vector (SIV) Authenticated
-    > Encryption Using the Advanced Encryption Standard (AES), D.
-    > Harkins,
-    > [<span class="underline">RFC5297</span>](https://tools.ietf.org/html/rfc5297),
-    > October 2008.
+  -  \[RFC5297\] Synthetic Initialization Vector (SIV) Authenticated
+     Encryption Using the Advanced Encryption Standard (AES), D.
+     Harkins,
+     [<span class="underline">RFC5297</span>](https://tools.ietf.org/html/rfc5297),
+     October 2008.
 
-  - > \[RFC5649\] Advanced Encryption Standard (AES) Key Wrap with
-    > Padding Algorithm, R. Housley, M. Dworkin,
-    > [<span class="underline">RFC5649</span>](https://tools.ietf.org/html/rfc5649),
-    > August 2009.
+  -  \[RFC5649\] Advanced Encryption Standard (AES) Key Wrap with
+     Padding Algorithm, R. Housley, M. Dworkin,
+     [<span class="underline">RFC5649</span>](https://tools.ietf.org/html/rfc5649),
+     August 2009.
 
-  - > \[RFC6070\] PBKDF2 Test Vectors
+  -  \[RFC6070\] PBKDF2 Test Vectors
 
-  - > \[SRTP-EKT\] Encrypted Key Transport for Secure RTP, D. McGrew, F.
-    > Andreasen, D. Wing, K. Fisher,
-    > [<span class="underline">draft-ietf-avt-srtp-ekt-02</span>](https://tools.ietf.org/html/draft-ietf-avt-srtp-ekt-02),
-    > March 2011.
+  -  \[SRTP-EKT\] Encrypted Key Transport for Secure RTP, D. McGrew, F.
+     Andreasen, D. Wing, K. Fisher,
+     [<span class="underline">draft-ietf-avt-srtp-ekt-02</span>](https://tools.ietf.org/html/draft-ietf-avt-srtp-ekt-02),
+     March 2011.
 
 
 
