@@ -53,7 +53,7 @@ jitter, and packet loss. This, in turn, leads to problems with decoding,
 as the audio and video decoders do not receive packets at the expected
 times. The use of large buffers helps, but latency is increased.
 
-![Before SR](/blob/master/images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0003.png)
+![Before SR](images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0003.png)
 
 SRT includes a mechanism that recreates the signal characteristics on
 the receiver side, dramatically reducing the need for buffering. This
@@ -61,7 +61,7 @@ functionality is part of the SRT protocol itself, so once data comes out
 of an SRT connection on the receiver side, the stream characteristics
 have been properly recovered.
 
-![After SR](/blob/master/images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0004.png)
+![After SR](/images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0004.png)
 
 Initially developed by Haivision Systems Inc., the SRT protocol was
 released as open source in April 2017 in partnership with Wowza Media
