@@ -1,5 +1,6 @@
-Secure Reliable Transport (SRT) Protocol Technical Overview
-===========================================================
+T E C H N I C A L   O V E R V I E W
+Secure Reliable Transport (SRT) Protocol
+========================================
 
 **NOTE**: This document was originally converted (2020-02-05) from the 
 latest working version (2019-09-18) of the published draft:
@@ -15,7 +16,7 @@ This document describes the SRT protocol itself. A fully functional
 reference implementation can be found at*
 *https://github.com/Haivision/srt.*
 
-# Introduction
+## Introduction
 
 SRT is a transport protocol that enables the secure, reliable transport
 of data across unpredictable networks, such as the Internet. While any
@@ -85,7 +86,7 @@ In May 2017, Haivision and Wowza founded the SRT Alliance
 (www.srtalliance.org), a consortium dedicated to the continued
 development and adoption of the protocol.
 
-# Table of Contents
+## Table of Contents
 
 **[Introduction](#introduction) 1**
 
@@ -220,9 +221,9 @@ Extensions](#sample-implementation-hsv4-legacy-callerlistener-handshake-with-srt
 > 
 > [Encryption](#encryption) 88
 
-#   
+##   
 
-# **Adaptation of UDT4 to SRT**
+## **Adaptation of UDT4 to SRT**
 
 UDT is an ARQ (Automatic Repeat reQuest) protocol. It implements the
 third evolution of ARQ (Selective Repeat). The UDT version 4 (UDT4)
@@ -308,15 +309,15 @@ After many retransmissions, all packets would be delivered and the
 receiver‘s queue unblocked. This was at the cost of huge bandwidth usage
 since at the time there was no sending rate control.
 
-#   
+##   
 
-# Packet Structure
+## Packet Structure
 
 SRT maintains UDT‘s UDP packet structure, but with some modifications.
 Refer to Section 2 of the UDT IETF Internet Draft (draft-gg-udt-03.txt)
 for more details.
 
-## Data and Control Packets
+### Data and Control Packets
 
 Every UDP packet carrying SRT traffic contains an SRT header
 (immediately after the UDP header). In all versions, the SRT header
@@ -436,9 +437,9 @@ referred to later in the section on the SRT Extended Handshake.
         > for data. Its interpretation depends on the particular message
         > type. Handshake messages don‘t use it.
 
-#   
+##   
 
-## Handshake Packets
+### Handshake Packets
 
 Handshake control packets (“packet type” bit = 1) are used to establish
 a connection between two peers in a point-to-point SRT session. Original
@@ -450,7 +451,7 @@ this document for details.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_011_Image_0003.png)
 
-## KM Error Response Packets
+### KM Error Response Packets
 
 Key Message Error Response control packets (“packet type” bit = 1) are
 used to exchange error status messages between peers. Refer to the
@@ -458,7 +459,7 @@ used to exchange error status messages between peers. Refer to the
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0003.png)
 
-## ACK Packets
+### ACK Packets
 
 Acknowledgement (ACK) control packets (“packet type” bit = 1) are used
 to provide data packet delivery status and RTT information. Refer to the
@@ -467,7 +468,7 @@ details.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0004.png)
 
-## Keep-alive Packets
+### Keep-alive Packets
 
 Keep-alive control packets (“packet type” bit = 1) are exchanged
 approximately every 10 ms to enable SRT streams to be automatically
@@ -475,7 +476,7 @@ restored after a connection loss.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0005.png)
 
-## NAK Control Packets
+### NAK Control Packets
 
 Negative acknowledgement (NAK) control packets (“packet type” bit = 1)
 are used to signal failed data packet deliveries. Refer to the **SRT
@@ -484,16 +485,16 @@ details.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_013_Image_0003.png)
 
-## SHUTDOWN Control Packets
+### SHUTDOWN Control Packets
 
 Shutdown control packets (“packet type” bit = 1) are used to initiate
 the closing of an SRT connection.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_013_Image_0004.png)
 
-##   
+###   
 
-## ACKACK Control Packets
+### ACKACK Control Packets
 
 ACKACK control packets (“packet type” bit = 1) are used to acknowledge
 the reception of an ACK, and are instrumental in the ongoing calculation
@@ -502,7 +503,7 @@ in this document for details.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_014_Image_0003.png)
 
-## Extended Control Message Packets
+### Extended Control Message Packets
 
 Extended Control Message packets (“packet type” bit = 1) are repurposed
 from the original UDT User control packets. They are used in the SRT
@@ -512,9 +513,9 @@ extensions.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_014_Image_0004.png)
 
-#   
+##   
 
-# SRT Data Exchange
+## SRT Data Exchange
 
 The diagram below provides a high level overview of the data exchange
 (including control data) between two peers in a point-to-point SRT
@@ -525,14 +526,14 @@ transmission portion.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_015_Image_0003.png)
 
-#   
+##   
 
-# SRT Data Transmission and Control
+## SRT Data Transmission and Control
 
 This section describes key concepts related to the handling of control
 and data packets during live streaming of audio and video.
 
-## Buffers
+### Buffers
 
 When an application (such as an encoder) provides data packets to SRT
 for transmission, they are stored in a circular send buffer. They are
@@ -565,7 +566,7 @@ time reference based on local StartTime is maintained, taking into
 account RTT, time zone and drift caused by the sum of truncated
 nanoseconds and other measurements.
 
-## Send Buffer Management
+### Send Buffer Management
 
 The send queue (SndQ) is a dynamically sized list that contains
 references to the contents of the Sender's buffers. When a send buffer
@@ -602,7 +603,7 @@ buffers or the SndQ. The SndQ updates variables for tracking where
 packets are added (ACKPOS), and which was the last to be acknowledged
 (LASTPOS).
 
-## SRT Buffer Latency
+### SRT Buffer Latency
 
 The sender and receiver have large buffers that are defined in SRT code
 (not exposed). On the sender, latency is the time that SRT holds a
@@ -695,7 +696,7 @@ item in a buffer has a start position (STARTPOS). There is a conversion
 between the position in the send buffer and the sequence number as the
 two increase.
 
-## SRT Sockets, Send List & Channel
+### SRT Sockets, Send List & Channel
 
 Consider sockets 1 and 2, each with its own send buffer. The SndQ
 contains a list of packets to send. There is a thread that continually
@@ -757,7 +758,7 @@ which is responsible for controlling the packet spacing with respect to
 the input rate to the buffer. The output is adjusted by spacing the
 packets in the buffer.
 
-## Packet Acknowledgement (ACKs)
+### Packet Acknowledgement (ACKs)
 
 At certain intervals (see **ACKs, ACKACKs & Round Trip Time**), the
 receiver sends an ACK that causes the acknowledged packets to be removed
@@ -776,7 +777,7 @@ In the case of loss, the ACK(seq) is the sequence number of the first
 packet in the loss list, which is the last contiguous received packet
 plus 1.
 
-## Packet Retransmission (NAKs)
+### Packet Retransmission (NAKs)
 
 If packet \#4 arrives in the receiver‘s buffer, but not packet \#3, a
 NAK is sent to the sender. This NAK is added to a compressed list (the
@@ -791,7 +792,7 @@ If packet number \#2 arrives, but packet \#3 does not, then when packet
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_022_Image_0004.png)
 
-## Packet Acknowledgment in SRT
+### Packet Acknowledgment in SRT
 
 The UDT draft defines a periodic NAK control packet carrying a list of
 all missing packets. The UDT4 implementation disabled this feature with
@@ -922,7 +923,7 @@ The receiver buffer depletes and there is no time left for
 retransmission if missing packets are discovered. Missing packets are
 then skipped by the receiver.
 
-## Bidirectional Transmission Queues
+### Bidirectional Transmission Queues
 
 SRT also anticipates the case where the receiver has its own
 transmission queue, and the sender has a corresponding receiver queue
@@ -943,9 +944,9 @@ chosen) within a single RTT period.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_025_Image_0003.png)
 
-##   
+###   
 
-## ACKs, ACKACKs & Round Trip Time
+### ACKs, ACKACKs & Round Trip Time
 
 Round-trip time (RTT) is a measure of the time it would take for a
 packet to travel back and forth. SRT cannot measure one-way transmission
@@ -992,7 +993,7 @@ The sender always gets the RTT from the receiver. It does not have an
 analog to the ACK/ACKACK mechanism (i.e. it can‘t send a message that
 guarantees an immediate return without processing).
 
-## Drift Management
+### Drift Management
 
 When the sender enters “connected” status it tells the application there
 is a socket interface that is transmitter-ready. At this point the
@@ -1035,7 +1036,7 @@ derived from the local time at the moment that the session is connected.
 A packet timestamp equals “now” minus “StartTime”, where the latter is
 the point in time when the socket was created.
 
-## Loss List
+### Loss List
 
 The sender maintains a list of lost packets (loss list) that is built
 from NAK reports. When scheduling to transmit, it looks to see if a
@@ -1093,9 +1094,9 @@ cause packets to be dropped from the queue. To prevent this, SRT imposes
 a minimum of one second (or the latency value) before dropping a packet.
 This allows for large I-frames when using small latency values.
 
-#   
+##   
 
-# SRT Packet Pacing
+## SRT Packet Pacing
 
 UDT uses a maximum bandwidth setting to control the packet output rate.
 This static setting isn‘t well-suited to a variable input, like when you
@@ -1269,7 +1270,7 @@ internally and the output pace is adjusted accordingly, including the
 configured overhead (default = 25%) that is added to permit the
 injection of retransmitted packets.
 
-## Packet Probes
+### Packet Probes
 
 While SRT exercises a certain amount of control over packet flow, there
 are limits imposed by the inability to precisely calculate the capacity
@@ -1285,33 +1286,33 @@ difficult to determine.
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_035_Image_0003.png)
 
-## 
+### 
 
-##   
+###   
 
-# The Sender‘s Algorithm
+## The Sender‘s Algorithm
 
 Refer to Section 6.1 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for details.
 
-# The Receiver‘s Algorithm
+## The Receiver‘s Algorithm
 
 Refer to Section 6.2 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for details.
 
-# Loss Information Compression Scheme
+## Loss Information Compression Scheme
 
 Refer to Section 6.4 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for details.
 
-# UDP Multiplexer
+## UDP Multiplexer
 
 SRT uses UDT‘s UDP multiplexer as is.
 
 Refer to Section 3 of the UDT IETF Internet Draft (draft-gg-udt-03.txt)
 for details.
 
-# Timers
+## Timers
 
 SRT uses UDT‘s timers, but with some changes. The NAK timer has a
 minimum value that existed in the UDT4 code but is not described there.
@@ -1321,7 +1322,7 @@ used.
 Refer to Section 4 of the UDT IETF Internet Draft (draft-gg-udt-03.txt)
 for details.
 
-# Flow Control
+## Flow Control
 
 Flow control, in terms of transfers, allows a stream to be a good
 Internet citizen. Flow control in SRT‘s live mode is really the absence
@@ -1336,9 +1337,9 @@ encoding, where the control would be at the input.
 Refer to Section 6.3 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for more details.
 
-#   
+##   
 
-# Configurable Congestion Control (CCC)
+## Configurable Congestion Control (CCC)
 
 The UDT protocol features a congestion control mechanism that allows it
 to be a good network citizen by holding back packets as network
@@ -1366,26 +1367,26 @@ enable file transfer among other things.
 Refer to Section 7 of the UDT IETF Internet Draft (draft-gg-udt-03.txt)
 for details.
 
-## CCC Interface
+### CCC Interface
 
 Refer to Section 7.1 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for details.
 
-## Native Control Algorithm
+### Native Control Algorithm
 
 Refer to Section 7.2 of the UDT IETF Internet Draft
 (draft-gg-udt-03.txt) for details.
 
-#   
+##   
 
-# SRT Encryption
+## SRT Encryption
 
 This section describes the encryption mechanism that protects the
 payload of SRT streams. Despite using standard cryptographic algorithms,
 the mechanism is unique and does not interoperate with any known third
 party stream encryption method.
 
-## Overview
+### Overview
 
 AES in counter mode (AES-CTR) is used with a short-lived key to encrypt
 the media stream. This cipher is suitable for random access of a
@@ -1533,7 +1534,7 @@ material based on that value, and send a response back to the sender.
 But this can be configured in another way. There is no obligation to
 have the same set of keys for transmission and reception.
 
-## Definitions
+### Definitions
 
 This section defines the elements of the SRT encryption mechanism.
 
@@ -1674,9 +1675,9 @@ The cryptographic usage limit of the KEK is 248 wraps (AESKW) which
 means virtual infinity at the expected SEK rekeying rate (90,000 years
 to rekey 100 keys every second).
 
-##   
+###   
 
-## Encryption Process Walkthrough
+### Encryption Process Walkthrough
 
 **Stream configuration**
 
@@ -1831,9 +1832,9 @@ to encrypt these messages is the one encrypted in the KMmsg received
 after, especially if backward secrecy is achieved (where a new receiver
 cannot decrypt an earlier stream).
 
-##   
+###   
 
-## Messages
+### Messages
 
 **Data Message Header**
 
@@ -1972,7 +1973,7 @@ may be only for a short period before re-keying the stream for a new
 receiver to decrypt the current stream, and for all members to prepare
 for seamless re-keying.
 
-## Parameters
+### Parameters
 
 |Parameter|Cfg|Default|Description||
 |--- |--- |--- |--- |--- |
@@ -1999,9 +2000,9 @@ SHA-2 (future: PKCS #5 v2.1)|
 usr: user configurable, sp: security policy (default: os), os: haios.ini
 \[HAICRYPT\]
 
-##   
+###   
 
-## Security Issues
+### Security Issues
 
 **Backward/Forward Secrecy**
 
@@ -2084,7 +2085,7 @@ a hardware implementation is desirable. Protecting a 128-bit key with a
 solution could be to use PBKDF2 even for non-password based KEK
 material.
 
-## Implementation Notes
+### Implementation Notes
 
 **PBKDF2**
 
@@ -2147,11 +2148,11 @@ an intermediate device, there is another session, and therefore another
 sequence. The packet‘s ciphertext payload would have to be put into a
 new packet with a new sequence number.
 
-#   
+##   
 
-# SRT Handshake
+## SRT Handshake
 
-## Overview
+### Overview
 
 SRT is a connection protocol, and as such it embraces the concepts of
 *connection* and *session*. The UDP system protocol is used by SRT for
@@ -2215,7 +2216,7 @@ srt\_setsockflag(s, SRTO\_MINVERSION, \&req\_version, sizeof(int));
     > versions of SRT by setting the minimum version 1.3.0 as shown
     > above.
 
-## Handshake Structure
+### Handshake Structure
 
 The control information field of the handshake control packet, which
 comes immediately after the UDT header and SRT header, consists of the
@@ -2315,7 +2316,7 @@ party is using version 4, the handshake continues as HSv4.
 flags, but now it also contains the encryption flag. For HSv5 rules to
 apply the extension flag needs to be expressly set*.
 
-## The “Legacy” and “SRT Extended” Handshakes
+### The “Legacy” and “SRT Extended” Handshakes
 
 **Legacy Handshake**
 
@@ -2484,9 +2485,9 @@ Listener only. In the case of Rendezvous the only reasonable approach is
 to decide upon the correct value from the different sources and to set
 it on both parties (note that AES-128 is the default).
 
-##   
+###   
 
-## The Caller-Listener Handshake
+### The Caller-Listener Handshake
 
 This section describes the handshaking process where a Listener is
 waiting for an incoming packet on a bound UDP port, which should be an
@@ -2625,7 +2626,7 @@ precedence over the Caller is the advertised PBKEYLEN in the Encryption
 Flags field in Type field. The value for latency is always agreed to be
 the greater of those reported by each party.*
 
-## The Rendezvous Handshake
+### The Rendezvous Handshake
 
 When two parties attempt to connect in Rendezvous mode, they are
 considered to be equivalent: Both are connecting, but neither is
@@ -3018,9 +3019,9 @@ to the conclusion phase, the HSv5 client is already aware that the peer
 is HSv4 and fills the fields of the conclusion handshake message
 according to the rules of HSv4.
 
-##   
+###   
 
-## The SRT Extended Handshake
+### The SRT Extended Handshake
 
 **HSv4 Extended Handshake Process**
 
@@ -3170,7 +3171,7 @@ and for receiving direction is placed in the upper 16 bits
 are two latency values, one per direction. Therefore both HSREQ and
 HSREQ messages contain both the Sender and Receiver latency values.
 
-## SRT Extension Commands
+### SRT Extension Commands
 
 **HSREQ and HSRSP**
 
@@ -3528,12 +3529,12 @@ packets exceeds a certain value (up to the moment of the connection or
 previous refresh), which is controlled by the SRTO\_KMREFRESHRATE and
 SRTO\_KMPREANNOUNCE options:
 
-1.  > Pre-announce: when \# of sent packets \> SRTO\_KMREFRESHRATE -
+1.  > Pre-announce: when \## of sent packets \> SRTO\_KMREFRESHRATE -
     > SRTO\_KMPREANNOUNCE
 
-2.  > Key switch: when \# of sent packets \> SRTO\_KMREFRESHRATE
+2.  > Key switch: when \## of sent packets \> SRTO\_KMREFRESHRATE
 
-3.  > Decommission: when \# of sent packets \> SRTO\_KMREFRESHRATE +
+3.  > Decommission: when \## of sent packets \> SRTO\_KMREFRESHRATE +
     > SRTO\_KMPREANNOUNCE
 
 In other words, SRTO\_KMREFRESHRATE is the exact number of transmitted
@@ -3572,7 +3573,7 @@ KM exchange. In HSv5 the initial KM exchange is done within the
 handshake in both directions, and then the key refresh process is
 started by the Sender and it updates the key for one direction only.*
 
-## SRT Congestion Control
+### SRT Congestion Control
 
 The SRT Congestion Control feature (supported by HSv5 only) adds
 functionality similar to the “congestion control” class from UDT.
@@ -3600,7 +3601,7 @@ However, it contains many changes and allows the selection of the
 original UDT code in places that have been modified in SRT to support
 live transmission.
 
-## Stream ID (SID)
+### Stream ID (SID)
 
 This feature is supported by HSv5 only. Its value is a string of the
 user‘s choice that can be passed from the Caller to the Listener.
@@ -3615,7 +3616,7 @@ decide which stream to send in the case where the Listener is the stream
 Sender. This feature is not intended to be used for Rendezvous
 connections.
 
-# Sample Implementation — HSv4 (Legacy) Caller/Listener Handshake with SRT Extensions
+## Sample Implementation — HSv4 (Legacy) Caller/Listener Handshake with SRT Extensions
 
 *Part 1 of 4: Begin HSv4 UDT Caller/Listener Handshake*
 
@@ -3657,7 +3658,7 @@ SRT Extensions** (cont’d)
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | **1**. We must continue to use 0 for destination ID here since the Listener did not provided its Socket ID yet: cif.hs.ID contains our own SockID from Ahs0 | **2**. Cookie is generated by Listener (B) but transmitted to A and we verify here that A sent it back in Ahs1 |
 
-#   
+##   
 
 Sample Implementation — **HSv4 (Legacy) Caller/Listener Handshake with
 SRT Extensions** (cont’d)
@@ -3688,7 +3689,7 @@ SRT Extensions** (cont’d)
 
 ![](images/SRT-TechnicalOverview-2019-09-18_Page_091_Image_0003.png)
 
-# Terminology
+## Terminology
 
 | **Term** | **Description**                                                |
 | -------- | -------------------------------------------------------------- |
@@ -3741,13 +3742,13 @@ SRT Extensions** (cont’d)
 | TU       | Transmission Unit                                              |
 | UDP      | User Datagram Protocol                                         |
 
-# References
+## References
 
-## SRT Alliance
+### SRT Alliance
 
   - > <span class="underline">SRT Deployment Guide</span>
 
-## SRT on GitHub
+### SRT on GitHub
 
   - > <span class="underline">API.md</span>
 
@@ -3765,7 +3766,7 @@ SRT Extensions** (cont’d)
 
   - > [<span class="underline">handshake.md</span>](https://github.com/ethouris/srt/blob/97386cc7646d1152bf0257f3e6da4545d48aa5a1/docs/handshake.md)
 
-## UDT
+### UDT
 
   - > [<span class="underline">http://udt.sourceforge.net/doc.html</span>](http://udt.sourceforge.net/doc.html)
 
@@ -3873,7 +3874,7 @@ Journal of Grid Computing, 2003, Volume 1, Issue 4, pp. 377-386
     > Tutorial</span>](http://udt.sourceforge.net/doc/udt-tutorial.ppt)
     > (SC 2004, outdated)
 
-## Encryption
+### Encryption
 
   - > \[ANSX9.102\] Accredited Standards Committee, Wrapping of Keys and
     > Associated Data, ANS X9.102, not for free document.
