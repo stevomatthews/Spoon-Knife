@@ -63,7 +63,7 @@ jitter, and packet loss. This, in turn, leads to problems with decoding,
 as the audio and video decoders do not receive packets at the expected
 times. The use of large buffers helps, but latency is increased.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0003.png)
+![](images/SRT_UnhappyDecoder_2018-09-10.png)
 
 SRT includes a mechanism that recreates the signal characteristics on
 the receiver side, dramatically reducing the need for buffering. This
@@ -71,7 +71,7 @@ functionality is part of the SRT protocol itself, so once data comes out
 of an SRT connection on the receiver side, the stream characteristics
 have been properly recovered.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_002_Image_0004.png)
+![](images/SRT_HappyDecoder_2018-09-10.png)
 
 Initially developed by Haivision Systems Inc., the SRT protocol was
 released as open source in April 2017 in partnership with Wowza Media
@@ -89,138 +89,136 @@ development and adoption of the protocol.
 
 ## Table of Contents
 
-**[Introduction](#introduction) 1**
+**[Introduction](#introduction)**
 
-**[Table of Contents](#table-of-contents) 3**
+**[Table of Contents](#table-of-contents)**
 
-**[Adaptation of UDT4 to SRT](#adaptation-of-udt4-to-srt) 6**
+**[Adaptation of UDT4 to SRT](#adaptation-of-udt4-to-srt)**
 
-**[Packet Structure](#packet-structure) 8**
+**[Packet Structure](#packet-structure)**
 
-> [Data and Control Packets](#data-and-control-packets) 8
+> [Data and Control Packets](#data-and-control-packets)
 > 
-> [Handshake Packets](#handshake-packets) 11
+> [Handshake Packets](#handshake-packets)
 > 
-> [KM Error Packets](#km-error-response-packets) 12
+> [KM Error Packets](#km-error-response-packets)
 > 
-> [ACK Packets](#ack-packets) 12
+> [ACK Packets](#ack-packets)
 > 
-> [Keep-alive Packets](#keep-alive-packets) 12
+> [Keep-alive Packets](#keep-alive-packets)
 > 
-> [NAK Control Packets](#nak-control-packets) 13
+> [NAK Control Packets](#nak-control-packets)
 > 
-> [SHUTDOWN Control Packets](#shutdown-control-packets) 13
+> [SHUTDOWN Control Packets](#shutdown-control-packets)
 > 
-> [ACKACK Control Packets](#ackack-control-packets) 14
+> [ACKACK Control Packets](#ackack-control-packets)
 > 
 > [Extended Control Message Packets](#extended-control-message-packets)
-> 14
 
-**[SRT Data Exchange](#srt-data-exchange) 15**
+**[SRT Data Exchange](#srt-data-exchange)**
 
 **[SRT Data Transmission and
-Control](#srt-data-transmission-and-control) 16**
+Control](#srt-data-transmission-and-control)**
 
-> [Buffers](#buffers) 16
+> [Buffers](#buffers)
 > 
-> [Send Buffer Management](#send-buffer-management) 16
+> [Send Buffer Management](#send-buffer-management)
 > 
-> [SRT Buffer Latency](#srt-buffer-latency) 17
+> [SRT Buffer Latency](#srt-buffer-latency)
 > 
-> [SRT Sockets, Send List & Channel](#srt-sockets-send-list-channel) 19
+> [SRT Sockets, Send List & Channel](#srt-sockets-send-list-channel)
 > 
-> [Packet Acknowledgement (ACKs)](#packet-acknowledgement-acks) 20
+> [Packet Acknowledgement (ACKs)](#packet-acknowledgement-acks)
 > 
-> [Packet Retransmission (NAKs)](#packet-retransmission-naks) 21
+> [Packet Retransmission (NAKs)](#packet-retransmission-naks)
 > 
-> [Packet Acknowledgment in SRT](#packet-acknowledgment-in-srt) 22
+> [Packet Acknowledgment in SRT](#packet-acknowledgment-in-srt)
 > 
 > [Bidirectional Transmission
-> Queues](#bidirectional-transmission-queues) 24
+> Queues](#bidirectional-transmission-queues)
 > 
-> [ACKs, ACKACKs & Round Trip Time](#acks-ackacks-round-trip-time) 25
+> [ACKs, ACKACKs & Round Trip Time](#acks-ackacks-round-trip-time)
 > 
-> [Drift Management](#drift-management) 26
+> [Drift Management](#drift-management)
 > 
-> [Loss List](#loss-list) 27
+> [Loss List](#loss-list)
 
-**[SRT Packet Pacing](#srt-packet-pacing) 29**
+**[SRT Packet Pacing](#srt-packet-pacing)**
 
-> [Packet Probes](#packet-probes) 34
+> [Packet Probes](#packet-probes)
 
-**[The Sender‘s Algorithm](#the-senders-algorithm) 35**
+**[The Sender‘s Algorithm](#the-senders-algorithm)**
 
-**[The Receiver‘s Algorithm](#the-receivers-algorithm) 35**
+**[The Receiver‘s Algorithm](#the-receivers-algorithm)**
 
 **[Loss Information Compression
-Scheme](#loss-information-compression-scheme) 35**
+Scheme](#loss-information-compression-scheme)**
 
-**[UDP Multiplexer](#udp-multiplexer) 35**
+**[UDP Multiplexer](#udp-multiplexer)**
 
-**[Timers](#timers) 35**
+**[Timers](#timers)**
 
-**[Flow Control](#flow-control) 35**
+**[Flow Control](#flow-control)**
 
 **[Configurable Congestion Control
-(CCC)](#configurable-congestion-control-ccc) 36**
+(CCC)](#configurable-congestion-control-ccc)**
 
-> [CCC Interface](#ccc-interface) 36
+> [CCC Interface](#ccc-interface)
 > 
-> [Native Control Algorithm](#native-control-algorithm) 36
+> [Native Control Algorithm](#native-control-algorithm)
 
-**[SRT Encryption](#srt-encryption) 37**
+**[SRT Encryption](#srt-encryption)**
 
-> [Overview](#overview) 37
+> [Overview](#overview)
 > 
-> [Definitions](#definitions) 41
+> [Definitions](#definitions)
 > 
-> [Encryption Process Walkthrough](#encryption-process-walkthrough) 44
+> [Encryption Process Walkthrough](#encryption-process-walkthrough)
 > 
-> [Messages](#messages) 48
+> [Messages](#messages)
 > 
-> [Parameters](#parameters) 52
+> [Parameters](#parameters)
 > 
-> [Security Issues](#security-issues) 53
+> [Security Issues](#security-issues)
 > 
-> [Implementation Notes](#implementation-notes) 54
+> [Implementation Notes](#implementation-notes)
 
-**[SRT Handshake](#srt-handshake) 56**
+**[SRT Handshake](#srt-handshake)**
 
-> [Overview](#overview-1) 56
+> [Overview](#overview-1)
 > 
-> [Handshake Structure](#handshake-structure) 57
+> [Handshake Structure](#handshake-structure)
 > 
 > [The “Legacy” and “SRT Extended”
-> Handshakes](#the-legacy-and-srt-extended-handshakes) 59
+> Handshakes](#the-legacy-and-srt-extended-handshakes)
 > 
-> [The Caller-Listener Handshake](#the-caller-listener-handshake) 62
+> [The Caller-Listener Handshake](#the-caller-listener-handshake)
 > 
-> [The Rendezvous Handshake](#the-rendezvous-handshake) 64
+> [The Rendezvous Handshake](#the-rendezvous-handshake)
 > 
-> [The SRT Extended Handshake](#the-srt-extended-handshake) 71
+> [The SRT Extended Handshake](#the-srt-extended-handshake)
 > 
-> [SRT Extension Commands](#srt-extension-commands) 74
+> [SRT Extension Commands](#srt-extension-commands)
 > 
-> [SRT Congestion Control](#srt-congestion-control) 80
+> [SRT Congestion Control](#srt-congestion-control)
 > 
-> [Stream ID (SID)](#stream-id-sid) 80
+> [Stream ID (SID)](#stream-id-sid)
 
 **[Sample Implementation — HSv4 (Legacy) Caller/Listener Handshake with
 SRT
-Extensions](#sample-implementation-hsv4-legacy-callerlistener-handshake-with-srt-extensions)
-81**
+Extensions](#sample-implementation-hsv4-legacy-callerlistener-handshake-with-srt-extensions)**
 
-**[Terminology](#terminology) 85**
+**[Terminology](#terminology)**
 
-**[References](#references) 87**
+**[References](#references)**
 
-> [SRT Alliance](#srt-alliance) 87
+> [SRT Alliance](#srt-alliance)
 > 
-> [SRT on GitHub](#srt-on-github) 87
+> [SRT on GitHub](#srt-on-github)
 > 
-> [UDT](#udt) 87
+> [UDT](#udt)
 > 
-> [Encryption](#encryption) 88
+> [Encryption](#encryption)
 
 ##   
 
