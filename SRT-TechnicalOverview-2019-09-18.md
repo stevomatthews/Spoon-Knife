@@ -79,7 +79,7 @@ have been properly recovered.
 
 ![](images/SendUList_SndQ_01_Arial.svg)
 
-![](images/SendUList_SndQ_01.svg)
+![SendUList_SndQ_01](images/SendUList_SndQ_01.svg)
 
 Initially developed by Haivision Systems Inc., the SRT protocol was
 released as open source in April 2017 in partnership with Wowza Media
