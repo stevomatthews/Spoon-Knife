@@ -63,7 +63,7 @@ jitter, and packet loss. This, in turn, leads to problems with decoding,
 as the audio and video decoders do not receive packets at the expected
 times. The use of large buffers helps, but latency is increased.
 
-![](images/SRT_UnhappyDecoder_2018-09-10.png)
+![](images/SRT_DecoderUnhappy.png)
 
 SRT includes a mechanism that recreates the signal characteristics on
 the receiver side, dramatically reducing the need for buffering. This
@@ -71,7 +71,7 @@ functionality is part of the SRT protocol itself, so once data comes out
 of an SRT connection on the receiver side, the stream characteristics
 have been properly recovered.
 
-![](images/SRT_HappyDecoder_10Sep2018.svg)
+![](images/SRT_DecoderHappy.png)
 
 Initially developed by Haivision Systems Inc., the SRT protocol was
 released as open source in April 2017 in partnership with Wowza Media
@@ -340,7 +340,7 @@ version 1.3.0. For the purpose of promoting compatibility with earlier
 versions, old and new packet structures are presented here. Packet
 diagrams in this document are in network bit order (big-endian).*
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_008_Image_0003.png)
+![](images/SRT_Packet_Data.png)
 
 L E G E N D
 
@@ -396,7 +396,7 @@ document.
 An SRT **control** packet header (“packet type” bit = 1) has the
 following structure (UDP header not shown):
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_009_Image_0003.png)
+![](images/SRT_Packet_Control.png)
 
 For Control packets the first two fields are interpreted respectively
 (using network bit order) as:
@@ -448,7 +448,7 @@ parameters immediately after a connection was opened, but as of version
 of the handshake itself. Refer to the **Handshake** section later in
 this document for details.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_011_Image_0003.png)
+![](images/SRT_Packet_Handshake.png)
 
 ### KM Error Response Packets
 
@@ -456,7 +456,7 @@ Key Message Error Response control packets (“packet type” bit = 1) are
 used to exchange error status messages between peers. Refer to the
 **Encryption** section later in this document for details.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0003.png)
+![](images/SRT_Packet_KM_ErrorResponse.png)
 
 ### ACK Packets
 
@@ -465,7 +465,7 @@ to provide data packet delivery status and RTT information. Refer to the
 **SRT Data Transmission and Control** section later in this document for
 details.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0004.png)
+![](images/SRT_Packet_ACK.png)
 
 ### Keep-alive Packets
 
@@ -473,7 +473,7 @@ Keep-alive control packets (“packet type” bit = 1) are exchanged
 approximately every 10 ms to enable SRT streams to be automatically
 restored after a connection loss.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_012_Image_0005.png)
+![](images/SRT_Packet_Keep-alive.png)
 
 ### NAK Control Packets
 
@@ -482,14 +482,14 @@ are used to signal failed data packet deliveries. Refer to the **SRT
 Data Transmission and Control** section later in this document for
 details.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_013_Image_0003.png)
+![](images/SRT_Packet_NAK.png)
 
 ### SHUTDOWN Control Packets
 
 Shutdown control packets (“packet type” bit = 1) are used to initiate
 the closing of an SRT connection.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_013_Image_0004.png)
+![](images/SRT_Packet_Shutdown.png)
 
 ###   
 
@@ -500,7 +500,7 @@ the reception of an ACK, and are instrumental in the ongoing calculation
 of RTT. Refer to the **SRT Data Transmission and Control** section later
 in this document for details.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_014_Image_0003.png)
+![](images/SRT_Packet_ACKACK.png)
 
 ### Extended Control Message Packets
 
@@ -510,7 +510,7 @@ extended handshake, either through separate messages, or inside the
 handshake. Note that they are not intended to be used as user
 extensions.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_014_Image_0004.png)
+![](images/SRT_Packet_ExtendedControlMessage.png)
 
 ##   
 
@@ -523,7 +523,7 @@ session. For example, the peers may start as Caller and Listener during
 the handshake, but then become Sender and Receiver for the data
 transmission portion.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_015_Image_0003.png)
+![](images/SRT_CallerListenerInteraction.png)
 
 ##   
 
@@ -545,7 +545,7 @@ StartTime is when the application creates an SRT socket. A timestamp is
 the time between StartTime and when a packet is added to the send
 buffer.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_016_Image_0003.png)
+![](images/SRT_DataFlow_SenderBuffer.png)
 
 **NOTE**: *Time here is shown going from left to right, with the most
 recent packet at the right.*
@@ -555,7 +555,7 @@ just until the time that the oldest packet is delivered for output. When
 the configured latency ends up aligned with packet 2, packet 1 is
 delivered to the application.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_016_Image_0004.png)
+![](images/SRT_DataFlow_ReceiverBuffer.png)
 
 Timestamps are relative to the connection. The transmission is not based
 on an absolute time. The scheduled execution time is based on a real
@@ -577,7 +577,7 @@ The diagram below shows a send buffer associated with an SRT socket
 timestamp, and the location index, which is the location in the SndQ
 itself. This reference object is part of the SndQ object.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_017_Image_0003.png)
+![](images/SRT_SendUList_SndQ_A.png)
 
 The SndQ is a double link list, where each entry points to the send node
 (CSnode) of a send buffer. CSnode is an object of the SndQ class (SndQ
@@ -621,7 +621,7 @@ For example, in the diagram below, packet \#2 is the oldest, and is at
 the head of the receiver‘s queue (packet \#1 has already been
 delivered).
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_018_Image_0003.png)
+![](images/SRT_DataFlow_LatencyWindow.png)
 
 The latency “window” slides from left to right along the queue. When
 packet \#2 slides out of that window, it is delivered to the application
@@ -637,7 +637,7 @@ time between transmissions. The latency window effectively defines what
 is recoverable, or how many times a packet can be recovered, based on
 the RTT.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_018_Image_0004.png)
+![](images/SRT_Rcv_Latency_A.png)
 
 At the appropriate moment, the receiver‘s buffer releases the first
 packet to the output application. When the latency window slides to
@@ -650,7 +650,7 @@ be ready to give to the application, but is not available. That leads to
 a skipped packet. It cannot be recovered, so it will be removed from the
 loss list and never asked for again.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_018_Image_0005.png)
+![](images/SRT_Rcv_Latency_B.png)
 
 The sliding latency window can be thought of as a zone in which an SRT
 receiver can recover (most) packets.
@@ -703,7 +703,7 @@ checks the send buffer. When a packet is ready to send, a CSnode is
 created that identifies the packet‘s socket, and a corresponding object
 is created in the SndQ that will point back to the send buffer.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_020_Image_0003.png)
+![](images/SRT_SendUList_SndQ_B.png)
 
 Each packet has a timestamp that dictates when to send it. The SndQ List
 is sorted in order of the timestamps to be processed. If the send thread
@@ -716,7 +716,7 @@ The other send buffer from socket 2 can also add to this SndQ. The send
 thread will ask the buffer to give it a packet, and it will calculate
 the spacing between the packets in terms of the rate.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_020_Image_0004.png)
+![](images/SRT_SendUList_SndQ_C.png)
 
 The timestamp together with the inter-packet interval will determine
 where the packet will be re-inserted in the SndQ (either before or after
@@ -770,7 +770,7 @@ For example, if the receiver sends an ACK for packet 6 (see below), this
 means that all the packets with sequence numbers less than that have
 been received, and can be removed from the sender‘s buffer.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_021_Image_0003.png)
+![](images/SRT_DataFlow_ACK.png)
 
 In the case of loss, the ACK(seq) is the sequence number of the first
 packet in the loss list, which is the last contiguous received packet
@@ -784,12 +784,12 @@ periodic NAK report) that is sent at intervals to mitigate the
 possibility that individual NAKs may themselves be delayed or lost in
 transmission.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_022_Image_0003.png)
+![](images/SRT_NAK_A.png)
 
 If packet number \#2 arrives, but packet \#3 does not, then when packet
 \#4 arrives, the NAK is sent right away\[5\] to address the reordering.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_022_Image_0004.png)
+![](images/SRT_NAK_B.png)
 
 ### Packet Acknowledgment in SRT
 
@@ -941,7 +941,7 @@ Tx). The Receiver responds with corresponding values. The proposed
 latency values are evaluated on both sides (and the larger values
 chosen) within a single RTT period.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_025_Image_0003.png)
+![](images/SRT_Bidirectional_Latency.png)
 
 ###   
 
@@ -954,7 +954,7 @@ ACK (from a receiver) will trigger the transmission of an ACKACK (by the
 sender), with almost no delay. The time it takes for an ACK to be sent
 and an ACKACK to be received is the RTT.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_026_Image_0003.png)
+![](images/SRT_ACK_Period_LightACK_Interval_A.png)
 
 The ACKACK tells the receiver to stop sending the ACK position because
 the sender already knows it. Otherwise, ACKs (with outdated information)
@@ -969,7 +969,7 @@ packets being sent and received that the ACK position on the sender
 doesn‘t advance quickly enough. To mitigate this, after 64 packets (even
 if the ACK period has not fully elapsed) the receiver sends a light ACK.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_026_Image_0004.png)
+![](images/SRT_ACK_Period_LightACK_Interval_B.png)
 
 An ACK serves as a ping, with a corresponding ACKACK pong, to measure
 RTT. Each ACK has a number. A corresponding ACKACK has that same number.
@@ -984,9 +984,9 @@ The RTT is calculated by the receiver and sent with the next full ACK.
 Note that the first ACK in an SRT session might contain an initial RTT
 value of 100 ms, because the early calculations may not be precise.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_027_Image_0003.png)
+![](images/SRT_DataFlow_Packet_ACK.png)
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_027_Image_0004.png)
+![](images/SRT_DataFlow_Packet_ACKACK.png)
 
 The sender always gets the RTT from the receiver. It does not have an
 analog to the ACK/ACKACK mechanism (i.e. it can‘t send a message that
@@ -1051,12 +1051,12 @@ they are not retransmitted unnecessarily. The operations in the send
 queue and the loss list are managed by changing the ACK position
 (ACKPOS).
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_029_Image_0003.png)
+![](images/SRT_LossList_ACK_Position_A.png)
 
 When the ACKPOS has advanced to a certain point, all the packets older
 than the one at that position are removed from the send queue.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_029_Image_0004.png)
+![](images/SRT_LossList_ACK_Position_B.png)
 
 When a receiver encounters the situation where the next packet to be
 played was not successfully received from the sender, it will “skip”
@@ -1131,7 +1131,7 @@ size of a packet. The interval between the packets is determined by
 comparing the timestamps between consecutive packets. Packet output is
 scheduled based on the packet size and interval.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_030_Image_0003.png)
+![](images/SRT_Pacing_Packet_Period.png)
 
 Transmission speed is controlled by a timer between the packets. In the
 legacy code, the packet period is adjusted by the congestion control
@@ -1157,7 +1157,7 @@ rate for the decoder.
 There are three configuration elements: INPUTBW, MAXBW, and OVERHEAD
 (%).
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_031_Image_0003.png)
+![](images/SRT_Pacing_InputSettings_A.png)
 
 | **MAXBW** | **INPUTBW** | **OVERHEAD (%)** | **Output Rate**\[10\]            |
 | --------- | ----------- | ---------------- | -------------------------------- |
@@ -1185,7 +1185,7 @@ the SRT sender‘s buffer, because of the time it takes to measure the
 speed. If they arrive too late at the output, there is a negative
 effect.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_032_Image_0003.png)
+![](images/SRT_Pacing_BlackScreenLag.png)
 
 To correct this, the SRT sender‘s output can be configured at the
 nominal bit rate of the input by interacting more directly with the
@@ -1193,13 +1193,13 @@ video encoder on which SRT is running. Since it is possible to know the
 bit rate at which the encoder is configured, any modification can be
 passed directly into the SRT configuration (INPUTBW). This is the goal.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_032_Image_0004.png)
+![](images/SRT_Pacing_InputSettings_B.png)
 
 In the diagram below, the SRT sender‘s output starts to follow the dip
 in encoder input caused by the black screen, but will not follow all the
 way.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_033_Image_0003.png)
+![](images/SRT_Pacing_NoDropOff.png)
 
 But this solution has its own weaknesses. At low bit rate, the input to
 SRT from an encoder will often exceed the nominal bit rate. Since the
@@ -1211,7 +1211,7 @@ packets would have to be transmitted over an extended period of time.
 They would accumulate in the buffer, wouldn‘t be output quickly enough,
 and eventually some packets would be sent too late.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_033_Image_0004.png)
+![](images/SRT_Pacing_LossRetransmission.png)
 
 The orange line in graphs above represents packets that have to be
 retransmitted using the available overhead space, based on the latency.
@@ -1241,7 +1241,7 @@ send SRT doesn‘t send anything). However, if the encoder input rate
 rises above the configured rate, it will be followed as much as
 possible. Combining the two methods overcomes the deficiencies of each.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_034_Image_0003.png)
+![](images/SRT_Pacing_Combined.png)
 
 In theory, the bandwidth cap is accounted for by the bandwidth overhead.
 If there are too many packets to retransmit, SRT does not transmit them.
@@ -1283,7 +1283,7 @@ measure the capacity of the link. But the calculation of the spacing
 between packets is not controlled, so the available bandwidth remains
 difficult to determine.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_035_Image_0003.png)
+![](images/SRT_Pacing_Packet_Probe.png)
 
 ### 
 
@@ -1394,7 +1394,7 @@ confidentiality when the counter is managed properly. SRT implements
 encryption using AES-CTR mode, effectively using encryption to decrypt
 an encrypted packet.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_038_Image_0003.png)
+![](images/SRT_EncryptDecrypt.png)
 
 SRT encrypts the media stream at the Transmission Payload level (UDP
 payload of MPEG-TS/UDP encapsulation, which is about 7 MPEG-TS packets
@@ -1423,7 +1423,7 @@ transmitted within the stream (KM Tx Period), wrapped with another
 longer-term key, the Key Encrypting Key (KEK), using a known AES key
 wrap protocol.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_039_Image_0003.png)
+![](images/SRT_StreamEncryption.png)
 
 For connection-oriented transport such as SRT, there is no need to
 periodically transmit the short-lived key since no party can join the
@@ -1497,9 +1497,7 @@ understand. Once the sender gets to the 2^25 packet using the odd key
 This happens transparently, from one packet to the next. At 2^25 plus
 4000 packets the first key will be decommissioned automatically.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_041_Image_0003.png)
-
-![](images/SRT-TechnicalOverview-2019-09-18_Page_041_Image_0004.png)
+![](images/SRT_Encryption_OddEvenKey.png)
 
 The keys live in parallel for a certain period of time. A bit before and
 a bit after the 2^25 mark there are two keys that exist in parallel, in
@@ -1525,7 +1523,7 @@ itself. In the new HSv5, the keying material piggybacks on the second
 round-trip, including the response. The handshake initiator sends the
 key length, and then the key material exchange happens on the last trip.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_042_Image_0003.png)
+![](images/SRT_Encryption_Handshake.png)
 
 In Haivision products, for example, the key length is configured on the
 sender, then sent to the receiver, which will generate its keying
@@ -1610,7 +1608,7 @@ for counting blocks of a packet, a packet index in the next 32 bits, and
 80 zeroed bits. The upper 112 bits are XORed with the IV to produce a
 unique counter for each crypto block.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_043_Image_0003.png)
+![](images/SRT_Encryption_HeaderAES_Counter.png)
 
 The block counter (bctr) is incremented for each cipher block while
 producing the key stream. The packet index is incremented for each
@@ -1648,7 +1646,7 @@ When rekeying occurs, the SRT data header odd/even flag flips, and the
 receiver already has the new key in hand to continue decrypting the
 stream without missing a packet.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_044_Image_0003.png)
+![](images/SRT_Encryption_OddEvenKey_KM_Preannounce.png)
 
 **Key Encrypting Key (KEK)**
 
@@ -1738,7 +1736,7 @@ KMmsg = Header || CryptoInfo || Wrap
 
 **Encryption and Transmission**
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_047_Image_0003.png)
+![](images/SRT_StreamEncryption.png)
 
 **KMmsg Transmission (KM Tx Period)**
 
@@ -1770,7 +1768,7 @@ payload\[index\])
 
 **Reception and Decryption**
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_048_Image_0003.png)
+![](images/SRT_StreamDecryption.png)
 
 **Detect Encryption**
 
@@ -1837,7 +1835,7 @@ cannot decrypt an earlier stream).
 
 **Data Message Header**
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_051_Image_0003.png)
+![](images/SRT_Packet_Encryption_DataMessageHeader.png)
 
 | **Field** | **Bits** | **Value** | **Description**                                                      |
 | --------- | -------- | --------- | -------------------------------------------------------------------- |
@@ -1848,7 +1846,7 @@ cannot decrypt an earlier stream).
 
 **SRT Control Message Header**
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_051_Image_0004.png)
+![](images/SRT_Packet_Encryption_ControlMessageHeader.png)
 
 | **Field** | **Bits** | **Value** | **Description**                 |
 | --------- | -------- | --------- | ------------------------------- |
@@ -1860,7 +1858,7 @@ cannot decrypt an earlier stream).
 The Keying Material message provides the information to decrypt the
 Media Stream message payload.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_052_Image_0003.png)
+![](images/SRT_Packet_Encryption_KMmsg.png)
 
 |**Field**|**Bits**|**Value**|**Description**|
 |--- |--- |--- |--- |
@@ -1933,7 +1931,7 @@ salting key; Initialization Vector, or be used as a generator for them.
 
 Once KMmsg is unwrapped, the following fields are revealed.
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_054_Image_0003.png)
+![](images/SRT_Packet_Encryption_Wrap.png)
 
 |Field|Bits|Value|Description|
 |--- |--- |--- |--- |
@@ -2236,14 +2234,14 @@ following 32-bit fields in order:
 Here is a representation of the HSv4 handshake structure (which follows
 immediately after the SRT control packet header):
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_061_Image_0003.png)
+![](images/SRT_Packet_Handshake_HSv4_UDT4.png)
 
 And here is the equivalent portion of the HSv5 handshake structure (to
 simplify the comparison here, the extended portion of the HSv5 handshake
 structure is not shown. See the “UDT Legacy” and “SRT Extended”
 Handshakes section for details):
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_062_Image_0003.png)
+![](images/SRT_Packet_Handshake_HSv5.png)
 
 The HSv4 (UDT-legacy based) handshake is based on two rules:
 
@@ -3031,7 +3029,7 @@ will only affect data transmission.
 Here is a representation of the HSv4 extended handshake packet structure
 (including the first four 32-bit segments of the SRT header):
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_076_Image_0003.png)
+![](images/SRT_Packet_Handshake_HSv4Extended.png)
 
 The HSv4 extended handshake is performed with the use of the
 aforementioned “SRT Extended Messages”, using control messages with
@@ -3079,7 +3077,7 @@ they give up and stay with a pure UDT connection.
 Here is a representation of the HSv5 integrated handshake packet
 structure (without SRT header):
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_077_Image_0003.png)
+![](images/SRT_Packet_Handshake_HSv5_Extended.png)
 
 The Extension Flags subfield in the Type field in a conclusion handshake
 message contains one of these flags:
@@ -3183,7 +3181,7 @@ The SRT\_CMD\_HSREQ message contains three 32-bit fields designated as:
 
   -  SRT\_HS\_LATENCY: the latency specification
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_079_Image_0003.png)
+![](images/SRT_Packet_Handshake_HSREQ_HSRSP.png)
 
 The flags (SRT Flags field) are the following bits, in order:
 
@@ -3619,7 +3617,7 @@ connections.
 
 *Part 1 of 4: Begin HSv4 UDT Caller/Listener Handshake*
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_087_Image_0003.png)
+![](images/SRT_HandshakePacketOverview_HSv4_UDT4-call-lstn+SRT_Ext_A.png)
 
 <table>
 <tbody>
@@ -3651,7 +3649,7 @@ SRT Extensions** (cont’d)
 
 *Part 2 of 4: Begin HSv4 UDT Caller/Listener Conclusion Phase*
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_088_Image_0003.png)
+![](images/SRT_HandshakePacketOverview_HSv4_UDT4-call-lstn+SRT_Ext_B.png)
 
 |                                                                                                                                                             |                                                                                                                |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -3664,7 +3662,7 @@ SRT Extensions** (cont’d)
 
 *Part 3 of 4: Begin HSv4 UDT Caller/Listener Conclusion Phase*
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_089_Image_0003.png)
+![](images/SRT_HandshakePacketOverview_HSv4_UDT4-call-lstn+SRT_Ext_C.png)
 
 <table>
 <tbody>
@@ -3686,7 +3684,7 @@ SRT Extensions** (cont’d)
 
 *Part 4 of 4: HSv4 UDT Caller/Listener Conclusion Phase*
 
-![](images/SRT-TechnicalOverview-2019-09-18_Page_091_Image_0003.png)
+![](images/SRT_HandshakePacketOverview_HSv4_UDT4-call-lstn+SRT_Ext_D.png)
 
 ## Terminology
 
