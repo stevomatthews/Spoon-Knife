@@ -71,7 +71,7 @@ functionality is part of the SRT protocol itself, so once data comes out
 of an SRT connection on the receiver side, the stream characteristics
 have been properly recovered.
 
-![](images/SRT_DecoderHappy.png)
+![](images/SRT_DecoderHappy.svg)
 
 Initially developed by Haivision Systems Inc., the SRT protocol was
 released as open source in April 2017 in partnership with Wowza Media
