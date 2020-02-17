@@ -18,21 +18,21 @@
 
 **[Control Packets](#control-packets)**
 
-**[Handshake Packets](handshake-packets)**
-> 
-> [KM Error Packets](#km-error-response-packets)
-> 
-> [ACK Packets](#ack-packets)
-> 
-> [Keep-alive Packets](#keep-alive-packets)
-> 
-> [NAK Control Packets](#nak-control-packets)
-> 
-> [SHUTDOWN Control Packets](#shutdown-control-packets)
-> 
-> [ACKACK Control Packets](#ackack-control-packets)
-> 
-> [Extended Control Message Packets](#extended-control-message-packets)
+**[Handshake Packets](#handshake-packets)**
+
+**[KM Error Packets](#km-error-response-packets)**
+
+**[ACK Packets](#ack-packets)**
+
+**[Keep-alive Packets](#keep-alive-packets)**
+
+**[NAK Control Packets](#nak-control-packets)**
+
+**[SHUTDOWN Control Packets](#shutdown-control-packets)**
+
+**[ACKACK Control Packets](#ackack-control-packets)**
+
+**[Extended Control Message Packets](#extended-control-message-packets)**
 
 
 
