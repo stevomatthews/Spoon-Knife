@@ -517,7 +517,7 @@ is formatted as follows:
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
        |     Cipher    |     Auth      |      SE       |     Resv1     |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |             Recv2             |     Slen/4    |     klen/4    |
+       |             Resv2             |     Slen/4    |     klen/4    |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ kmext
        |                                                               :
        :                             Salt                              :
@@ -593,7 +593,7 @@ is formatted as follows:
    Resv1 ( ): 8 bits. Value: {0}  
    This is a fixed-width field . . .
 
-   Recv2 ( ): 16 bits. Value: {0}  
+   Resv2 ( ): 16 bits. Value: {0}  
    This is a fixed-width field . . .
 
    Slen/4 ( ): 8 bits. Value: {4}  
@@ -661,7 +661,7 @@ as follows:
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
        |     Cipher    |     Auth      |      SE       |     Resv1     |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |             Recv2             |     Slen/4    |     klen/4    |
+       |             Resv2             |     Slen/4    |     klen/4    |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
        |                                                               :
        :                             Salt                              :
@@ -797,7 +797,7 @@ as follows:
    Resv1 ( ): 8 bits. Value: {0}  
    This is a fixed-width field . . .
 
-   Recv2 ( ): 16 bits. Value: {0}  
+   Resv2 ( ): 16 bits. Value: {0}  
    This is a fixed-width field . . .
 
    Slen/4 ( ): 8 bits. Value: {4}  
